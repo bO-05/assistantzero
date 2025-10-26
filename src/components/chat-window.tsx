@@ -176,7 +176,13 @@ export function ChatWindow(props: {
                 isLoading={isChatLoading}
               />
               <div className="flex flex-col max-w-[768px] mx-auto pb-12 w-full">
-                <TokenVaultInterruptHandler interrupt={toolInterrupt} />
+                <TokenVaultInterruptHandler 
+                  interrupt={toolInterrupt}
+                  onFinish={() => {
+                    console.log('TokenVault auth completed, sending continuation message');
+                    toast.success('✅ Google account connected! Retrying your request...');
+                  }}
+                />
               </div>
             </>
           )

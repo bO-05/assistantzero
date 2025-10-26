@@ -13,18 +13,25 @@ interface TokenVaultInterruptHandlerProps {
 
 export function TokenVaultInterruptHandler({ interrupt, onFinish }: TokenVaultInterruptHandlerProps) {
   const id = useId();
+  
+  // Debug logging
+  console.log('TokenVaultInterruptHandler - interrupt:', interrupt);
+  console.log('TokenVaultInterruptHandler - isInterrupt:', TokenVaultInterrupt.isInterrupt(interrupt));
+  
   if (!interrupt || !TokenVaultInterrupt.isInterrupt(interrupt)) {
     return null;
   }
 
+  console.log('Rendering TokenVaultConsentPopup for:', interrupt);
+
   return (
-    <div key={id} className="whitespace-pre-wrap">
+    <div key={id} className="whitespace-pre-wrap border-2 border-accent-orange bg-pale p-6 mb-4">
       <TokenVaultConsentPopup
         interrupt={interrupt}
         connectWidget={{
-          title: 'Authorization Required.',
-          description: interrupt.message,
-          action: { label: 'Authorize' },
+          title: '🔐 Google Authorization Required',
+          description: interrupt.message || 'You need to connect your Google account to access Gmail.',
+          action: { label: 'Connect Google Account' },
         }}
         onFinish={onFinish}
       />

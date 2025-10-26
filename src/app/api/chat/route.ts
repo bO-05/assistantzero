@@ -87,22 +87,16 @@ function createAuditedTools(toolDefinitions: Record<string, any>, baseContext: A
               await logger.logToolSuccess(result);
               return result;
             } catch (error) {
+              // Check if this is a TokenVaultInterrupt or other Auth0 interrupt
+              // These should NOT be logged as errors - they're user prompts
+              const errorName = (error as any)?.constructor?.name;
+              if (errorName === 'TokenVaultInterrupt' || errorName === 'AccessDeniedInterrupt' || (error as any)?.__interrupt) {
+                // This is an interrupt, not an error - let it bubble up to the interrupt handler
+                throw error;
+              }
+              
               const errorMessage = (error as Error).message ?? 'Unknown error';
               await logger.logToolError(errorMessage, toolName);
-              
-              // Provide user-friendly error messages for common issues
-              if (errorMessage.includes('Token Vault') || errorMessage.includes('google-oauth2')) {
-                throw new Error(
-                  '🔐 **Google Account Not Connected**\n\n' +
-                  'To access your Gmail, you need to connect your Google account first.\n\n' +
-                  '**How to connect:**\n' +
-                  '1. The system will prompt you to authorize Google access\n' +
-                  '2. Click "Connect Google Account" when prompted\n' +
-                  '3. Grant the required permissions (Gmail read/compose)\n' +
-                  '4. Try your request again\n\n' +
-                  'This is required for security and uses Auth0 Token Vault to keep your credentials safe.'
-                );
-              }
               
               throw error;
             }
@@ -190,8 +184,19 @@ export async function POST(req: NextRequest) {
       },
     ),
     onError: errorSerializer((err) => {
-      console.log(err);
-      return `An error occurred! ${(err as Error).message}`;
+      console.error('Chat error:', err);
+      console.error('Error type:', (err as any)?.constructor?.name);
+      console.error('Error message:', (err as Error)?.message);
+      console.error('Is interrupt?:', (err as any)?.__interrupt);
+      
+      // Don't show generic error for interrupts
+      const errorName = (err as any)?.constructor?.name;
+      if (errorName === 'TokenVaultInterrupt' || errorName === 'AccessDeniedInterrupt') {
+        return ''; // Interrupt will be handled by TokenVaultInterruptHandler
+      }
+      
+      const errorMessage = (err as Error)?.message || 'An unknown error occurred';
+      return `An error occurred: ${errorMessage}`;
     }),
   });
 
