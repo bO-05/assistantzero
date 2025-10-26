@@ -2,7 +2,7 @@
 
 A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0. Built for the Auth0 hackathon challenge.
 
-🚀 **[Live Demo](https://assistant0agent.vercel.app)** | 📦 **[GitHub Repo](https://github.com/bO-05/assistant0)**
+🚀 **[Live Demo](https://assistant0agent.vercel.app)** | 📦 **[GitHub Repo](https://github.com/bO-05/assistantzero)**
 
 > Built with Auth0 AI SDK, Next.js 15, Mistral AI, and Fine-Grained Authorization (FGA)
 
@@ -24,13 +24,13 @@ A smart AI assistant that helps you manage your digital life with enterprise-gra
 
 **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS, shadcn/ui
 
-**AI & Backend:** Vercel AI SDK, Mistral AI, Auth0 AI SDK, Auth0 Next.js SDK
+**AI & Backend:** Vercel AI SDK v5, Mistral AI, Auth0 AI SDK v4, Auth0 Next.js SDK v4
 
-**Security:** Auth0 FGA (Fine-Grained Authorization), Token Vault, Step-up Auth
+**Security:** Auth0 FGA (Fine-Grained Authorization), Token Vault, CIBA, Step-up Auth
 
-**Database:** PostgreSQL with Drizzle ORM + pgvector for semantic search
+**Database:** PostgreSQL (Neon) with Drizzle ORM + pgvector for semantic search
 
-**Deployment:** Vercel (free-tier friendly)
+**Deployment:** Vercel
 
 ## 📂 Project Structure
 
@@ -41,10 +41,12 @@ src/
 │   │   ├── chat/          # Streaming chat API endpoint
 │   │   ├── documents/     # Document upload API
 │   │   └── migrate/       # Database migration endpoint
-│   ├── page.tsx           # Main chat interface
+│   ├── page.tsx           # Main chat interface + landing page
 │   ├── documents/         # Document management page
 │   ├── mission-control/   # Audit trail dashboard
 │   ├── workspaces/        # Workspace management
+│   │   ├── [id]/         # Workspace detail page (dynamic route)
+│   │   └── new/          # Create workspace page
 │   ├── close/             # Session close page
 │   ├── layout.tsx         # Root layout
 │   └── globals.css        # Global styles
@@ -72,17 +74,18 @@ src/
 ```
 
 **How it works:**
-1. User authenticates via Auth0 → redirected by `src/middleware.ts`
-2. Chat with AI at `/` → streams from `src/app/api/chat/route.ts`
+1. User authenticates via Auth0 → managed by `src/middleware.ts`
+2. Chat with AI at `/` → streams from `src/app/api/chat/route.ts` with tool interrupts
 3. Upload docs at `/documents` → stored in PostgreSQL with pgvector embeddings
 4. Monitor actions at `/mission-control` → full audit trail with risk scoring
 5. Manage contexts at `/workspaces` → Auth0 FGA enforces isolation
+6. AI tools auto-prompt for Google OAuth via Token Vault when needed
 
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/bO-05/assistant0.git
+git clone https://github.com/bO-05/assistantzero.git
 cd assistant0
 ```
 
@@ -109,10 +112,11 @@ Copy `.env.example` to `.env.local` and configure:
 ### 3. Install & Initialize
 ```bash
 npm install
-docker compose up -d        # Start PostgreSQL
-npm run db:migrate          # Create database schema
-npm run fga:init            # Initialize FGA store
+npm run db:migrate          # Create database schema (if using local PostgreSQL)
+npm run fga:init            # Initialize FGA authorization model
 ```
+
+**Note:** If using Neon (recommended), database is already hosted. Just set `DATABASE_URL` in `.env.local`.
 
 ### 4. Run Development Server
 ```bash
@@ -128,11 +132,11 @@ Open [http://localhost:3000](http://localhost:3000) and start chatting with your
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
-npm run start        # Start production server
+npm run start        # Start production server (runs build first)
 npm run lint         # Run ESLint
 npm run db:migrate   # Run database migrations
 npm run db:studio    # Open Drizzle Studio (DB GUI)
-npm run fga:init     # Initialize FGA policies
+npm run fga:init     # Initialize FGA authorization model
 
 # Bundle analysis
 ANALYZE=true npm run build

@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </div>
                 )}
                 <Button asChild variant="header" size="default">
-                  <a href="https://github.com/bO-05/assistant0" target="_blank">
+                  <a href="https://github.com/bO-05/assistantzero" target="_blank">
                     <Github className="size-3" />
                     <span>Open in GitHub</span>
                   </a>
