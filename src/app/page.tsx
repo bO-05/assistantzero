@@ -85,7 +85,7 @@ export default async function Home() {
 
               {/* Hero Description */}
               <p className="text-lg font-ibm-plex-mono text-[#0a0a0a]/80 leading-relaxed max-w-md mb-8">
-                Advanced conversational intelligence designed for optimal human-machine collaboration. Field-tested. Production-ready.
+                A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0.
               </p>
 
               {/* CTA Buttons */}
@@ -166,17 +166,6 @@ export default async function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
             {/* Feature Card 1 */}
             <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
-              <Terminal className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
-              <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
-                CONSOLE ACCESS
-              </h3>
-              <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
-                Direct terminal interface for advanced operations
-              </p>
-            </div>
-
-            {/* Feature Card 2 */}
-            <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
               <Zap className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
               <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
                 HIGH PERFORMANCE
@@ -184,9 +173,9 @@ export default async function Home() {
               <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
                 Optimized response times and processing
               </p>
-            </div>
+            </div>            
 
-            {/* Feature Card 3 */}
+            {/* Feature Card 2 */}
             <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
               <Lock className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
               <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
@@ -197,16 +186,17 @@ export default async function Home() {
               </p>
             </div>
 
-            {/* Feature Card 4 */}
+            {/* Feature Card 3 */}
             <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
               <Cpu className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
               <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
                 AI POWERED
               </h3>
               <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
-                Advanced language models and reasoning
+                Mistral language models and reasoning
               </p>
             </div>
+
           </div>
 
           {/* CTA Section */}

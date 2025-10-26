@@ -120,6 +120,24 @@
   .chat-message-bubble pre {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .chat-message-bubble {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  .chat-message-bubble * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .chat-message-bubble code {
+    word-break: break-all;
   }
 
   .chat-message-bubble blockquote {

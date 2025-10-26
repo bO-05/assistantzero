@@ -14,8 +14,8 @@ import UserButton from '@/components/auth0/user-button';
 const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' });
 const ibmPlexMono = IBM_Plex_Mono({ weight: ['400', '500', '600', '700'], subsets: ['latin'], variable: '--font-ibm-plex-mono' });
 
-const TITLE = 'Auth0 Assistant0: An Auth0 + LangChain + Next.js Template';
-const DESCRIPTION = 'Starter template showing how to use Auth0 in LangChain + Next.js projects.';
+const TITLE = 'Assistant0';
+const DESCRIPTION = 'A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0.';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth0.getSession();
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-console/90 backdrop-blur-xl border-b-2 border-console sticky top-0 z-50">
               <div className="flex gap-4 flex-col md:flex-row md:items-center">
                 <a
-                  href="https://a0.to/ai-event"
+                  href="https://assistant0agent.vercel.app/"
                   rel="noopener noreferrer"
                   target="_blank"
                   className="flex items-center gap-2 px-4"

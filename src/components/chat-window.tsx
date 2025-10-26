@@ -68,6 +68,7 @@ function ChatInput(props: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   loading?: boolean;
+  onStop?: () => void;
   placeholder?: string;
   children?: ReactNode;
   className?: string;
@@ -87,18 +88,30 @@ function ChatInput(props: {
           placeholder={props.placeholder}
           onChange={props.onChange}
           className="border-none outline-none bg-transparent p-4 focus:ring-0 font-ibm-plex-mono text-console placeholder:text-console/50"
+          disabled={props.loading}
         />
 
         <div className="flex justify-between ml-4 mr-2 mb-2">
           <div className="flex gap-3">{props.children}</div>
 
-          <Button
-            className="border-2 border-console p-1.5 h-fit bg-console text-pale hover:bg-console/90"
-            type="submit"
-            disabled={props.loading}
-          >
-            {props.loading ? <LoaderCircle className="animate-spin" /> : <ArrowUpIcon size={14} />}
-          </Button>
+          <div className="flex gap-2">
+            {props.loading && props.onStop && (
+              <Button
+                className="border-2 border-console px-3 py-1.5 h-fit bg-pale text-console hover:bg-mint font-ibm-plex-mono text-xs"
+                type="button"
+                onClick={props.onStop}
+              >
+                Stop
+              </Button>
+            )}
+            <Button
+              className="border-2 border-console p-1.5 h-fit bg-console text-pale hover:bg-console/90"
+              type="submit"
+              disabled={props.loading}
+            >
+              {props.loading ? <LoaderCircle className="animate-spin" /> : <ArrowUpIcon size={14} />}
+            </Button>
+          </div>
         </div>
       </div>
     </form>
@@ -135,7 +148,7 @@ export function ChatWindow(props: {
   placeholder?: string;
   emoji?: string;
 }) {
-  const { messages, sendMessage, status, toolInterrupt } = useInterruptions((handler) =>
+  const { messages, sendMessage, status, toolInterrupt, stop } = useInterruptions((handler) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useChat({
       transport: new DefaultChatTransport({ api: props.endpoint }),
@@ -157,6 +170,11 @@ export function ChatWindow(props: {
     if (!input.trim() || isChatLoading) return;
     await sendMessage({ text: input });
     setInput('');
+  }
+
+  function handleStop() {
+    stop();
+    toast.info('Response stopped');
   }
 
   return (
@@ -195,6 +213,7 @@ export function ChatWindow(props: {
               onChange={(e) => setInput(e.target.value)}
               onSubmit={onSubmit}
               loading={isChatLoading}
+              onStop={handleStop}
               placeholder={props.placeholder ?? 'What can I help you with?'}
             ></ChatInput>
           </div>
