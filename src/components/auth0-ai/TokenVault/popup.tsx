@@ -63,7 +63,7 @@ export function TokenVaultConsentPopup({
       setLoginPopup(popup);
       setIsLoading(true);
     }
-  }, [connection, requiredScopes]);
+  }, [connection, requiredScopes, authorizePath, returnTo]);
 
   if (isLoading) {
     return <WaitingMessage />;
