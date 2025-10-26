@@ -73,6 +73,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div className="absolute inset-0">{children}</div>
             </div>
           </div>
+          
+          {/* Footer */}
+          <footer className="border-t-2 border-console bg-pale py-6 px-4">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="font-ibm-plex-mono text-xs text-console/70">
+                © 2025 Assistant0. Built with Auth0 for AI Agents Challenge.
+              </p>
+              <div className="flex gap-4 font-ibm-plex-mono text-xs">
+                <a href="/privacy" className="text-console hover:text-console/70 transition-colors">
+                  Privacy Policy
+                </a>
+                <span className="text-console/30">|</span>
+                <a href="/terms" className="text-console hover:text-console/70 transition-colors">
+                  Terms of Service
+                </a>
+                <span className="text-console/30">|</span>
+                <a href="https://github.com/bO-05/assistantzero" target="_blank" rel="noopener noreferrer" className="text-console hover:text-console/70 transition-colors">
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </footer>
+
           <Toaster richColors />
           <Analytics />
         </NuqsAdapter>
