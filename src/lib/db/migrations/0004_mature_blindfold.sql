@@ -1,0 +1,1 @@
+ALTER TABLE "documents" ADD COLUMN "workspace_id" varchar(191);
