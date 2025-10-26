@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { notFound, redirect } from 'next/navigation';
+import { ArrowLeft, Save } from 'lucide-react';
 
-import { createWorkspace } from '@/lib/actions/workspaces';
+import { getWorkspace, updateWorkspace } from '@/lib/actions/workspaces';
 import { auth0 } from '@/lib/auth0';
 
 const COLORS = [
@@ -13,20 +13,35 @@ const COLORS = [
   { value: 'slate', label: 'Slate', class: 'bg-slate-500' },
 ];
 
-export default async function NewWorkspacePage() {
+export default async function WorkspaceSettingsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth0.getSession();
   const user = session?.user;
 
   if (!user) {
+    redirect('/');
+  }
+
+  const workspace = await getWorkspace(id);
+
+  if (!workspace) {
+    notFound();
+  }
+
+  // Check if user owns this workspace
+  if (workspace.userId !== user.sub) {
     return (
       <div className="max-w-3xl mx-auto p-8 text-center">
-        <h1 className="text-3xl font-semibold mb-2">Create a workspace</h1>
-        <p className="text-muted-foreground">Please sign in with Auth0 to create and manage workspaces.</p>
+        <h1 className="text-3xl font-semibold mb-2">Access Denied</h1>
+        <p className="text-muted-foreground mb-4">You don&apos;t have permission to edit this workspace.</p>
+        <Link href="/workspaces" className="text-primary hover:underline">
+          ← Back to workspaces
+        </Link>
       </div>
     );
   }
 
-  async function handleCreate(formData: FormData) {
+  async function handleUpdate(formData: FormData) {
     'use server';
     
     const name = formData.get('name') as string;
@@ -37,34 +52,29 @@ export default async function NewWorkspacePage() {
       return;
     }
 
-    const workspace = await createWorkspace({
+    await updateWorkspace(id, {
       name: name.trim(),
       description: description?.trim() || null,
-      icon: null,
       color: color || 'blue',
-      isDefault: false,
     });
 
-    redirect('/workspaces');
+    redirect(`/workspaces/${id}`);
   }
 
   return (
     <div className="max-w-3xl mx-auto p-8">
       <Link
-        href="/workspaces"
+        href={`/workspaces/${id}`}
         className="inline-flex items-center gap-2 mb-6 font-ibm-plex-mono text-console hover:text-console/70 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to workspaces
+        Back to workspace
       </Link>
 
       <div className="border-2 border-console bg-pale p-8">
-        <h1 className="font-space-mono text-3xl font-bold text-console mb-2">Create New Workspace</h1>
-        <p className="font-ibm-plex-mono text-sm text-console/70 mb-6">
-          Organize your life into secure contexts powered by Auth0 Fine-Grained Authorization.
-        </p>
+        <h1 className="font-space-mono text-3xl font-bold text-console mb-6">Workspace Settings</h1>
 
-        <form action={handleCreate} className="space-y-6">
+        <form action={handleUpdate} className="space-y-6">
           {/* Name */}
           <div>
             <label htmlFor="name" className="block font-ibm-plex-mono text-sm font-bold text-console mb-2">
@@ -75,27 +85,26 @@ export default async function NewWorkspacePage() {
               name="name"
               type="text"
               required
+              defaultValue={workspace.name}
               maxLength={50}
               className="w-full border-2 border-console bg-white px-4 py-2 font-ibm-plex-mono text-console focus:outline-none focus:ring-2 focus:ring-console"
               placeholder="e.g., Work, Personal, Family"
             />
-            <p className="mt-1 font-ibm-plex-mono text-xs text-console/70">
-              Choose a descriptive name for this context
-            </p>
           </div>
 
           {/* Description */}
           <div>
             <label htmlFor="description" className="block font-ibm-plex-mono text-sm font-bold text-console mb-2">
-              Description (Optional)
+              Description
             </label>
             <textarea
               id="description"
               name="description"
               rows={3}
+              defaultValue={workspace.description || ''}
               maxLength={200}
               className="w-full border-2 border-console bg-white px-4 py-2 font-ibm-plex-mono text-console focus:outline-none focus:ring-2 focus:ring-console resize-none"
-              placeholder="What will you use this workspace for?"
+              placeholder="Optional description of this workspace"
             />
           </div>
 
@@ -103,17 +112,17 @@ export default async function NewWorkspacePage() {
           <div>
             <label className="block font-ibm-plex-mono text-sm font-bold text-console mb-3">Color Theme</label>
             <div className="flex gap-3">
-              {COLORS.map((colorOption, index) => (
+              {COLORS.map((colorOption) => (
                 <label key={colorOption.value} className="cursor-pointer">
                   <input
                     type="radio"
                     name="color"
                     value={colorOption.value}
-                    defaultChecked={index === 0}
+                    defaultChecked={workspace.color === colorOption.value}
                     className="sr-only peer"
                   />
                   <div
-                    className={`w-12 h-12 ${colorOption.class} border-2 border-console peer-checked:ring-4 peer-checked:ring-console peer-checked:ring-offset-2 transition-all hover:scale-105`}
+                    className={`w-12 h-12 ${colorOption.class} border-2 border-console peer-checked:ring-4 peer-checked:ring-console peer-checked:ring-offset-2 transition-all`}
                     title={colorOption.label}
                   />
                 </label>
@@ -121,14 +130,11 @@ export default async function NewWorkspacePage() {
             </div>
           </div>
 
-          {/* Info Box */}
+          {/* Info */}
           <div className="bg-mint border-2 border-console p-4">
-            <h3 className="font-ibm-plex-mono text-sm font-bold text-console mb-2">🔐 Why Workspaces?</h3>
-            <ul className="list-disc list-inside font-ibm-plex-mono text-xs text-console/70 space-y-1">
-              <li>Keep work, personal, and family data isolated with Auth0 FGA enforcement</li>
-              <li>Scope documents and automations to specific contexts</li>
-              <li>Future: Share access with teammates without exposing private content</li>
-            </ul>
+            <p className="font-ibm-plex-mono text-xs text-console/70">
+              <strong>Note:</strong> Changes to workspace settings will apply immediately. Documents and audit logs remain associated with this workspace.
+            </p>
           </div>
 
           {/* Actions */}
@@ -137,11 +143,11 @@ export default async function NewWorkspacePage() {
               type="submit"
               className="border-2 border-console bg-console text-pale px-6 py-3 font-ibm-plex-mono text-sm font-bold hover:bg-console/90 transition-colors flex items-center gap-2"
             >
-              <Plus className="h-4 w-4" />
-              Create Workspace
+              <Save className="h-4 w-4" />
+              Save Changes
             </button>
             <Link
-              href="/workspaces"
+              href={`/workspaces/${id}`}
               className="border-2 border-console bg-pale text-console px-6 py-3 font-ibm-plex-mono text-sm font-bold hover:bg-mint transition-colors"
             >
               Cancel

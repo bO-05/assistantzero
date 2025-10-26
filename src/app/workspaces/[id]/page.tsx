@@ -135,7 +135,7 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
               className="w-full border-2 border-console bg-pale hover:bg-mint px-4 py-3 font-ibm-plex-mono text-sm font-bold text-console transition-colors flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />
-              Workspace settings (coming soon)
+              Edit workspace settings
             </Link>
 
             {!workspace.isDefault && (
