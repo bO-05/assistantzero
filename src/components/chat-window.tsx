@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, useEffect, type FormEvent, type ReactNode } from 'react';
 import { type UIMessage, DefaultChatTransport, generateId, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { toast } from 'sonner';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
-import { ArrowDown, ArrowUpIcon, LoaderCircle } from 'lucide-react';
+import { ArrowDown, ArrowUpIcon, LoaderCircle, Trash2 } from 'lucide-react';
 import { useInterruptions } from '@auth0/ai-vercel/react';
 
 import { TokenVaultInterruptHandler } from '@/components/auth0-ai/TokenVault/TokenVaultInterruptHandler';
@@ -148,9 +148,10 @@ export function ChatWindow(props: {
   placeholder?: string;
   emoji?: string;
 }) {
-  const { messages, sendMessage, status, toolInterrupt, stop } = useInterruptions((handler) =>
+  const { messages, sendMessage, status, toolInterrupt, stop, setMessages } = useInterruptions((handler) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useChat({
+      id: 'assistant0-chat',
       transport: new DefaultChatTransport({ api: props.endpoint }),
       generateId,
       onError: handler((e: Error) => {
@@ -161,9 +162,42 @@ export function ChatWindow(props: {
     }),
   );
 
+  // Load messages from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('assistant0-chat-messages');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as UIMessage[];
+          if (parsed && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        } catch (e) {
+          console.error('Failed to load chat history:', e);
+        }
+      }
+    }
+  }, [setMessages]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && messages.length > 0) {
+      localStorage.setItem('assistant0-chat-messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   const [input, setInput] = useState('');
 
   const isChatLoading = status === 'streaming';
+
+  // Clear chat history function
+  function handleClearChat() {
+    if (confirm('Clear all chat history? This cannot be undone.')) {
+      setMessages([]);
+      localStorage.removeItem('assistant0-chat-messages');
+      toast.success('Chat history cleared');
+    }
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -208,6 +242,15 @@ export function ChatWindow(props: {
         footer={
           <div className="sticky bottom-8 px-2">
             <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
+            {messages.length > 0 && (
+              <button
+                onClick={handleClearChat}
+                className="absolute bottom-full right-2 mb-4 border-2 border-console bg-pale hover:bg-red-100 px-3 py-1.5 font-ibm-plex-mono text-xs text-console hover:text-red-600 transition-colors flex items-center gap-1"
+              >
+                <Trash2 className="w-3 h-3" />
+                Clear Chat
+              </button>
+            )}
             <ChatInput
               value={input}
               onChange={(e) => setInput(e.target.value)}
