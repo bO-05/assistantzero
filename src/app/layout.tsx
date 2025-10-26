@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div className="flex justify-center">
                 {session && (
                   <div className="flex items-center gap-2 px-4 text-white">
-                    <UserButton user={session?.user!} logoutUrl="/auth/logout" />
+                    <UserButton user={session?.user!} />
                   </div>
                 )}
                 <Button asChild variant="header" size="default">

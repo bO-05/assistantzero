@@ -6,7 +6,7 @@ import { TokenVaultAuthProps } from './TokenVaultAuthProps';
 export function TokenVaultConsentRedirect({
   interrupt: { requiredScopes, connection },
   connectWidget: { icon, title, description, action, containerClassName },
-  auth: { authorizePath = '/auth/login', returnTo = window.location.pathname } = {},
+  auth: { authorizePath = '/api/auth/login', returnTo = window.location.pathname } = {},
 }: TokenVaultAuthProps) {
   return (
     <PromptUserContainer

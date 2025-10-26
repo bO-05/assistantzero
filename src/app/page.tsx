@@ -91,7 +91,7 @@ export default async function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
                 <a
-                  href="/auth/login"
+                  href="/api/auth/login"
                   className="terminal-border bg-[#0a0a0a] text-[#e8f4ed] px-8 py-3 font-ibm-plex-mono font-bold text-sm tracking-wider hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2"
                 >
                   <LogIn className="w-4 h-4" aria-hidden="true" />
@@ -99,7 +99,7 @@ export default async function Home() {
                 </a>
 
                 <a
-                  href="/auth/login?screen_hint=signup"
+                  href="/api/auth/login?screen_hint=signup"
                   className="terminal-border bg-[#e8f4ed] text-[#0a0a0a] px-8 py-3 font-ibm-plex-mono font-bold text-sm tracking-wider hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-4 h-4" aria-hidden="true" />
@@ -220,7 +220,7 @@ export default async function Home() {
                 Sign in to access your AI assistant and unlock the full potential of human-machine collaboration.
               </p>
               <a
-                href="/auth/login"
+                href="/api/auth/login"
                 className="inline-flex bg-[#d4e8dc] text-[#0a0a0a] px-10 py-4 font-ibm-plex-mono font-bold text-sm tracking-wider hover:bg-[#e8f4ed] transition-colors border-2 border-[#d4e8dc] items-center gap-2"
               >
                 <LogIn className="w-4 h-4" aria-hidden="true" />
