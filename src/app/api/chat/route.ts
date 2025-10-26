@@ -25,12 +25,18 @@ const date = new Date().toISOString();
 const mistralModelId = process.env.MISTRAL_CHAT_MODEL ?? 'mistral-small-latest';
 
 const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks.
+
 You have access to a set of tools. When using tools, you MUST provide valid JSON arguments. Always format tool call arguments as proper JSON objects.
 For example, when calling shop_online tool, format like this:
 {"product": "iPhone", "qty": 1, "priceLimit": 1000}
+
 Use the tools as needed to answer the user's question. Render the email body as a markdown block, do not wrap it in code blocks.
-If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
-When appropriate, let the user know that the action has been logged in Mission Control for auditability.
+
+**Important Security Notes:**
+- If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
+- If you encounter an error about "Token Vault" or "google-oauth2", it means the user needs to connect their Google account first. A popup will appear to guide them through the authorization process. DO NOT retry the tool call - wait for them to complete the authorization.
+- When appropriate, let the user know that the action has been logged in Mission Control for auditability.
+
 Today is ${date}.`;
 
 const TOOL_AGENT_ROLES: Record<string, string> = {
@@ -81,7 +87,23 @@ function createAuditedTools(toolDefinitions: Record<string, any>, baseContext: A
               await logger.logToolSuccess(result);
               return result;
             } catch (error) {
-              await logger.logToolError((error as Error).message ?? 'Unknown error', toolName);
+              const errorMessage = (error as Error).message ?? 'Unknown error';
+              await logger.logToolError(errorMessage, toolName);
+              
+              // Provide user-friendly error messages for common issues
+              if (errorMessage.includes('Token Vault') || errorMessage.includes('google-oauth2')) {
+                throw new Error(
+                  '🔐 **Google Account Not Connected**\n\n' +
+                  'To access your Gmail, you need to connect your Google account first.\n\n' +
+                  '**How to connect:**\n' +
+                  '1. The system will prompt you to authorize Google access\n' +
+                  '2. Click "Connect Google Account" when prompted\n' +
+                  '3. Grant the required permissions (Gmail read/compose)\n' +
+                  '4. Try your request again\n\n' +
+                  'This is required for security and uses Auth0 Token Vault to keep your credentials safe.'
+                );
+              }
+              
               throw error;
             }
           },

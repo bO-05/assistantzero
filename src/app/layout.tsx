@@ -3,6 +3,7 @@ import { Space_Mono, IBM_Plex_Mono } from 'next/font/google';
 import Image from 'next/image';
 import { Github } from 'lucide-react';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { Analytics } from '@vercel/analytics/next';
 
 import { ActiveLink } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </div>
           <Toaster richColors />
+          <Analytics />
         </NuqsAdapter>
       </body>
     </html>
