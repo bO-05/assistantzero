@@ -1,5 +1,5 @@
 import './globals.css';
-import { Roboto_Mono, Inter } from 'next/font/google';
+import { Space_Mono, IBM_Plex_Mono } from 'next/font/google';
 import Image from 'next/image';
 import { Github } from 'lucide-react';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
@@ -10,8 +10,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { auth0 } from '@/lib/auth0';
 import UserButton from '@/components/auth0/user-button';
 
-const robotoMono = Roboto_Mono({ weight: '400', subsets: ['latin'] });
-const publicSans = Inter({ weight: '400', subsets: ['latin'] });
+const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' });
+const ibmPlexMono = IBM_Plex_Mono({ weight: ['400', '500', '600', '700'], subsets: ['latin'], variable: '--font-ibm-plex-mono' });
 
 const TITLE = 'Auth0 Assistant0: An Auth0 + LangChain + Next.js Template';
 const DESCRIPTION = 'Starter template showing how to use Auth0 in LangChain + Next.js projects.';
@@ -33,10 +33,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="twitter:description" content={DESCRIPTION} />
         <meta name="twitter:image" content="/images/og-image.png" />
       </head>
-      <body className={publicSans.className}>
+      <body className={`${ibmPlexMono.variable} ${spaceMono.variable} ${ibmPlexMono.className}`}>
         <NuqsAdapter>
-          <div className="bg-secondary grid grid-rows-[auto,1fr] h-[100dvh]">
-            <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-black/25 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50 shadow-lg">
+          <div className="bg-mint grid grid-rows-[auto,1fr] h-[100dvh]">
+            <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-console/90 backdrop-blur-xl border-b-2 border-console sticky top-0 z-50">
               <div className="flex gap-4 flex-col md:flex-row md:items-center">
                 <a
                   href="https://a0.to/ai-event"
@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 >
                   <Image src="/images/auth0-logo.svg" alt="Auth0 AI Logo" className="h-8" width={143} height={32} />
                 </a>
-                <span className={`${robotoMono.className} text-white text-2xl`}>Assistant0</span>
+                <span className={`${spaceMono.className} text-white text-2xl`}>Assistant0</span>
                 <nav className="flex gap-1 flex-col md:flex-row">
                   <ActiveLink href="/">Chat</ActiveLink>
                   <ActiveLink href="/documents">Documents</ActiveLink>
@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </Button>
               </div>
             </div>
-            <div className="gradient-up bg-gradient-to-b from-white/10 to-white/0 relative grid border-input border-b-0">
+            <div className="relative grid overflow-auto">
               <div className="absolute inset-0">{children}</div>
             </div>
           </div>

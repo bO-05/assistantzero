@@ -41,11 +41,20 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        mint: '#d4e8dc',
+        pale: '#e8f4ed',
+        console: '#0a0a0a',
+        'accent-orange': '#ff5722',
       },
       borderRadius: {
         lg: `var(--radius)`,
         md: `calc(var(--radius) - 2px)`,
         sm: "calc(var(--radius) - 4px)",
+        none: '0px',
+      },
+      fontFamily: {
+        'space-mono': ['var(--font-space-mono)', 'monospace'],
+        'ibm-plex-mono': ['var(--font-ibm-plex-mono)', 'monospace'],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

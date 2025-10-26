@@ -38,15 +38,16 @@ export default async function DocumentsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
+      <h1 className="font-space-mono text-4xl font-bold mb-8 text-console">MY DOCUMENTS</h1>
+      
       {/* Section for Uploading New Documents */}
       <section className="mb-12">
-        <div className="p-6 border rounded-lg shadow-sm bg-card text-card-foreground card-hover">
+        <div className="p-6 border-2 border-console bg-pale">
           <DocumentUploadForm
             onUploadSuccess={handleDocumentActionComplete}
           />
         </div>
       </section>
-      <h1 className="text-2xl font-bold mb-8">My Documents</h1>
 
       {/* Section for Listing Existing Documents */}
       <section>
@@ -56,26 +57,26 @@ export default async function DocumentsPage() {
             {documents.map((doc) => (
               <div
                 key={doc.id}
-                className="p-4 border rounded-lg shadow-sm bg-card text-card-foreground flex justify-between items-center card-hover"
+                className="p-6 border-2 border-console bg-pale hover:bg-mint transition-colors flex justify-between items-center"
               >
                 <div className="mb-3 sm:mb-0">
-                  <h3 className="font-semibold text-lg mb-1">{doc.fileName}</h3>
-                  <p className="text-sm text-muted-foreground">Type: {doc.fileType}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-console">{doc.fileName}</h3>
+                  <p className="font-ibm-plex-mono text-xs text-console/70">Type: {doc.fileType}</p>
+                  <p className="font-ibm-plex-mono text-xs text-console/70">
                     Uploaded: {doc.createdAt ? format(doc.createdAt, 'PPP p') : 'N/A'}
                   </p>
-                  <p className="text-sm text-muted-foreground">{getSharingStatus(doc.sharedWith)}</p>
+                  <p className="font-ibm-plex-mono text-xs text-console/70">{getSharingStatus(doc.sharedWith)}</p>
                 </div>
                 <DocumentItemActions
                   doc={doc}
-                  onActionComplete={handleDocumentActionComplete} // Pass the revalidation action
+                  onActionComplete={handleDocumentActionComplete}
                 />
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-6 border rounded-lg shadow-sm bg-background text-center">
-            <p className="text-muted-foreground">
+          <div className="p-6 border-2 border-console bg-pale text-center">
+            <p className="font-ibm-plex-mono text-console/70">
               You haven&apos;t uploaded any documents yet. Use the form above to get started.
             </p>
           </div>

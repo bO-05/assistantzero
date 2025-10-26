@@ -30,68 +30,68 @@ export default async function MissionControlPage() {
   return (
     <div className="max-w-7xl mx-auto p-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Mission Control</h1>
-        <p className="text-muted-foreground">
+        <h1 className="font-space-mono text-4xl font-bold mb-2 text-console">MISSION CONTROL</h1>
+        <p className="font-ibm-plex-mono text-console/70">
           Comprehensive audit trail of all agent actions with Auth0 context and security posture
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-card border rounded-lg p-6 card-hover">
+        <div className="bg-pale border-2 border-console p-6 hover:bg-mint transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total Actions</p>
-              <p className="text-3xl font-bold">{stats.total}</p>
+              <p className="font-ibm-plex-mono text-xs text-console/70 tracking-wider">TOTAL ACTIONS</p>
+              <p className="font-space-mono text-3xl font-bold text-console">{stats.total}</p>
             </div>
-            <Activity className="h-8 w-8 text-blue-500" />
+            <Activity className="h-8 w-8 text-console" />
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 card-hover">
+        <div className="bg-pale border-2 border-console p-6 hover:bg-mint transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Successful</p>
-              <p className="text-3xl font-bold text-green-600">{stats.success}</p>
+              <p className="font-ibm-plex-mono text-xs text-console/70 tracking-wider">SUCCESSFUL</p>
+              <p className="font-space-mono text-3xl font-bold text-console">{stats.success}</p>
             </div>
-            <CheckCircle2 className="h-8 w-8 text-green-500" />
+            <CheckCircle2 className="h-8 w-8 text-console" />
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 card-hover">
+        <div className="bg-pale border-2 border-console p-6 hover:bg-mint transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Pending</p>
-              <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+              <p className="font-ibm-plex-mono text-xs text-console/70 tracking-wider">PENDING</p>
+              <p className="font-space-mono text-3xl font-bold text-console">{stats.pending}</p>
             </div>
-            <Clock className="h-8 w-8 text-yellow-500" />
+            <Clock className="h-8 w-8 text-console" />
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 card-hover">
+        <div className="bg-pale border-2 border-console p-6 hover:bg-mint transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Failed</p>
-              <p className="text-3xl font-bold text-red-600">{stats.failure}</p>
+              <p className="font-ibm-plex-mono text-xs text-console/70 tracking-wider">FAILED</p>
+              <p className="font-space-mono text-3xl font-bold text-console">{stats.failure}</p>
             </div>
-            <XCircle className="h-8 w-8 text-red-500" />
+            <XCircle className="h-8 w-8 text-console" />
           </div>
         </div>
       </div>
 
-      <div className="bg-card border rounded-lg">
-        <div className="p-6 border-b">
-          <h2 className="text-2xl font-semibold">Recent Activity Timeline</h2>
+      <div className="bg-pale border-2 border-console">
+        <div className="p-6 border-b-2 border-console">
+          <h2 className="font-space-mono text-2xl font-bold text-console">RECENT ACTIVITY TIMELINE</h2>
         </div>
 
-        <div className="divide-y">
+        <div className="divide-y-2 divide-console">
           {logs.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="p-8 text-center font-ibm-plex-mono text-console/70">
               <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No activity yet. Start a conversation to see audit logs here.</p>
+              <p className="font-ibm-plex-mono">No activity yet. Start a conversation to see audit logs here.</p>
             </div>
           ) : (
             logs.slice(0, 50).map((log) => (
-              <div key={log.id} className="p-6 hover:bg-muted/50 transition-all duration-200 hover:shadow-md">
+              <div key={log.id} className="p-6 hover:bg-mint transition-colors">
                 <div className="flex items-start gap-4">
                   <div className="mt-1">
                     {log.status === 'success' && <CheckCircle2 className="h-5 w-5 text-green-500" />}
@@ -101,7 +101,7 @@ export default async function MissionControlPage() {
 
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <p className="font-semibold">{log.action.replace(/_/g, ' ').toUpperCase()}</p>
+                      <p className="font-ibm-plex-mono font-bold text-console">{log.action.replace(/_/g, ' ').toUpperCase()}</p>
                       {log.toolName && (
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                           {log.toolName}
@@ -133,7 +133,7 @@ export default async function MissionControlPage() {
                       )}
                     </div>
 
-                    <div className="text-sm text-muted-foreground mb-2">
+                    <div className="font-ibm-plex-mono text-xs text-console/70 mb-2">
                       {new Date(log.createdAt).toLocaleString('en-US', {
                         dateStyle: 'medium',
                         timeStyle: 'medium',
@@ -143,10 +143,10 @@ export default async function MissionControlPage() {
 
                     {log.inputs && (
                       <details className="mt-2">
-                        <summary className="text-sm cursor-pointer text-muted-foreground hover:text-foreground">
+                        <summary className="font-ibm-plex-mono text-xs cursor-pointer text-console/70 hover:text-console">
                           View inputs
                         </summary>
-                        <pre className="mt-2 text-xs bg-muted p-3 rounded overflow-x-auto">
+                        <pre className="mt-2 font-ibm-plex-mono text-xs bg-pale border-2 border-console p-3 overflow-x-auto">
                           {JSON.stringify(log.inputs, null, 2)}
                         </pre>
                       </details>
@@ -154,10 +154,10 @@ export default async function MissionControlPage() {
 
                     {log.outputs && (
                       <details className="mt-2">
-                        <summary className="text-sm cursor-pointer text-muted-foreground hover:text-foreground">
+                        <summary className="font-ibm-plex-mono text-xs cursor-pointer text-console/70 hover:text-console">
                           View outputs
                         </summary>
-                        <pre className="mt-2 text-xs bg-muted p-3 rounded overflow-x-auto">
+                        <pre className="mt-2 font-ibm-plex-mono text-xs bg-pale border-2 border-console p-3 overflow-x-auto">
                           {JSON.stringify(log.outputs, null, 2)}
                         </pre>
                       </details>
@@ -177,9 +177,9 @@ export default async function MissionControlPage() {
         </div>
       </div>
 
-      <div className="mt-8 p-6 bg-muted/50 border rounded-lg">
-        <h3 className="font-semibold mb-2">About Mission Control</h3>
-        <p className="text-sm text-muted-foreground mb-4">
+      <div className="mt-8 p-6 bg-pale border-2 border-console">
+        <h3 className="font-ibm-plex-mono font-bold mb-2 text-console">ABOUT MISSION CONTROL</h3>
+        <p className="font-ibm-plex-mono text-xs text-console/70 mb-4">
           This dashboard provides comprehensive provenance and auditability for all AI agent actions. Every tool call is
           logged with full Auth0 context, risk assessment, and approval status - critical for enterprise trust and
           compliance.

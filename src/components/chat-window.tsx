@@ -15,11 +15,11 @@ import { cn } from '@/utils/cn';
 
 function TypingIndicator(props: { aiEmoji?: string }) {
   return (
-    <div className="rounded-[24px] max-w-[80%] mb-8 flex mr-auto">
-      <div className="mr-4 -mt-2 mt-1 border bg-secondary rounded-full w-10 h-10 flex-shrink-0 flex items-center justify-center">
+    <div className="max-w-[80%] mb-8 flex mr-auto">
+      <div className="mr-4 -mt-2 mt-1 border-2 border-console bg-pale w-10 h-10 flex-shrink-0 flex items-center justify-center">
         {props.aiEmoji}
       </div>
-      <div className="bg-secondary rounded-[24px] px-6 py-4">
+      <div className="bg-pale border-2 border-console px-6 py-4">
         <div className="typing-indicator">
           <span></span>
           <span></span>
@@ -52,7 +52,11 @@ function ScrollToBottom(props: { className?: string }) {
 
   if (isAtBottom) return null;
   return (
-    <Button variant="outline" className={props.className} onClick={() => scrollToBottom()}>
+    <Button 
+      variant="outline" 
+      className={cn("border-2 border-console bg-pale hover:bg-mint font-ibm-plex-mono text-xs", props.className)} 
+      onClick={() => scrollToBottom()}
+    >
       <ArrowDown className="w-4 h-4" />
       <span>Scroll to bottom</span>
     </Button>
@@ -77,19 +81,19 @@ function ChatInput(props: {
       }}
       className={cn('flex w-full flex-col', props.className)}
     >
-      <div className="border border-input bg-background rounded-lg flex flex-col gap-2 max-w-[768px] w-full mx-auto shadow-lg hover:shadow-xl transition-shadow duration-200">
+      <div className="border-2 border-console bg-pale flex flex-col gap-2 max-w-[768px] w-full mx-auto">
         <input
           value={props.value}
           placeholder={props.placeholder}
           onChange={props.onChange}
-          className="border-none outline-none bg-transparent p-4 focus:ring-0"
+          className="border-none outline-none bg-transparent p-4 focus:ring-0 font-ibm-plex-mono text-console placeholder:text-console/50"
         />
 
         <div className="flex justify-between ml-4 mr-2 mb-2">
           <div className="flex gap-3">{props.children}</div>
 
           <Button
-            className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+            className="border-2 border-console p-1.5 h-fit bg-console text-pale hover:bg-console/90"
             type="submit"
             disabled={props.loading}
           >

@@ -73,12 +73,12 @@ function ToolCallDisplay({ toolCall }: {
   const { toolName, args, result, status } = toolCall;
 
   return (
-    <div className="border border-gray-200 rounded-lg p-3 mb-2 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 hover:shadow-md transition-all duration-200">
+    <div className="border-2 border-console p-3 mb-2 bg-pale hover:bg-mint transition-colors">
       <div className="flex items-center gap-2 mb-2">
         {status === 'pending' && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
         {status === 'complete' && <CheckCircle className="w-4 h-4 text-green-500" />}
         {status === 'error' && <AlertCircle className="w-4 h-4 text-red-500" />}
-        <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
+        <span className="font-ibm-plex-mono font-bold text-xs text-console">
           {status === 'pending' && `Calling ${toolName}...`}
           {status === 'complete' && `Called ${toolName}`}
           {status === 'error' && `Error calling ${toolName}`}
@@ -88,12 +88,12 @@ function ToolCallDisplay({ toolCall }: {
       {/* Show tool arguments/input */}
       {args && Object.keys(args).length > 0 && (
         <div className="mb-2">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">Input:</div>
-          <div className="bg-white dark:bg-gray-900 rounded px-3 py-2 text-xs font-mono border border-gray-200 dark:border-gray-700">
+          <div className="font-ibm-plex-mono text-xs text-console/70 mb-1 font-bold">INPUT:</div>
+          <div className="bg-mint border-2 border-console px-3 py-2 font-ibm-plex-mono text-xs">
             {Object.entries(args).map(([key, value]) => (
               <div key={key} className="mb-1 last:mb-0">
-                <span className="text-blue-600 dark:text-blue-400">{key}:</span>{' '}
-                <span className="text-gray-800 dark:text-gray-200">
+                <span className="text-console font-bold">{key}:</span>{' '}
+                <span className="text-console/80">
                   {typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}
                 </span>
               </div>
@@ -105,9 +105,9 @@ function ToolCallDisplay({ toolCall }: {
       {/* Show tool result/output */}
       {result !== undefined && (
         <div>
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">Output:</div>
-          <div className="bg-green-50 dark:bg-green-900/20 rounded px-3 py-2 text-xs border border-green-200 dark:border-green-800">
-            <span className="text-green-800 dark:text-green-200">
+          <div className="font-ibm-plex-mono text-xs text-console/70 mb-1 font-bold">OUTPUT:</div>
+          <div className="bg-mint border-2 border-console px-3 py-2 font-ibm-plex-mono text-xs">
+            <span className="text-console">
               {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
             </span>
           </div>
@@ -125,18 +125,18 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
   return (
     <div
       className={cn(
-        'rounded-[24px] max-w-[80%] mb-8 flex transition-all duration-300 hover:shadow-lg',
-        message.role === 'user' ? 'bg-secondary text-secondary-foreground px-4 py-2 hover:bg-secondary/90' : null,
+        'max-w-[80%] mb-8 flex transition-colors',
+        message.role === 'user' ? 'bg-console text-pale border-2 border-console px-4 py-2 hover:bg-console/90 font-ibm-plex-mono' : null,
         message.role === 'user' ? 'ml-auto' : 'mr-auto',
       )}
     >
       {message.role !== 'user' && (
-        <div className="mr-4 -mt-2 mt-1 border bg-secondary rounded-full w-10 h-10 flex-shrink-0 flex items-center justify-center">
+        <div className="mr-4 -mt-2 mt-1 border-2 border-console bg-pale w-10 h-10 flex-shrink-0 flex items-center justify-center">
           {aiEmoji}
         </div>
       )}
 
-      <div className="chat-message-bubble whitespace-pre-wrap flex flex-col prose dark:prose-invert max-w-none">
+      <div className="chat-message-bubble whitespace-pre-wrap flex flex-col prose dark:prose-invert max-w-none font-ibm-plex-mono text-sm">
         {/* Render tool calls if present */}
         {toolCalls.length > 0 && (
           <div className="mb-3">

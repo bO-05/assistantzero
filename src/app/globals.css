@@ -24,6 +24,15 @@
     --destructive-foreground: 210 40% 98%;
     --ring: 215 20.2% 65.1%;
     --radius: 0.5rem;
+
+    /* Swiss Grid × Hyper Console Design Tokens */
+    --mint: #d4e8dc;
+    --pale: #e8f4ed;
+    --console: #0a0a0a;
+    --pixel: #000000;
+    --accent-orange: #ff5722;
+    --font-space-mono: 'Space Mono', 'Courier New', monospace;
+    --font-ibm-plex-mono: 'IBM Plex Mono', 'Courier New', monospace;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -259,5 +268,42 @@
   .card-hover:hover {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
+  }
+
+  /* Swiss Grid × Hyper Console Utilities */
+  .terminal-border {
+    border: 2px solid var(--console);
+    box-shadow: 4px 4px 0 var(--console);
+  }
+
+  .pixel-corners {
+    clip-path: polygon(
+      0 2px, 2px 2px, 2px 0,
+      calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px,
+      100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), 
+      calc(100% - 2px) 100%,
+      2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px)
+    );
+  }
+
+  .checkered-pattern {
+    background-image: repeating-conic-gradient(
+      var(--console) 0% 25%, 
+      transparent 0% 50%
+    );
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+  }
+
+  .halftone-gradient {
+    background: 
+      radial-gradient(circle, transparent 30%, 
+        var(--console) 30%, 
+        var(--console) 35%, transparent 35%),
+      radial-gradient(circle, transparent 30%, 
+        var(--console) 30%, 
+        var(--console) 35%, transparent 35%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
   }
 }
