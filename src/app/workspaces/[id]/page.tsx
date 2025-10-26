@@ -33,7 +33,7 @@ export default async function WorkspacePage({ params }: { params: { id: string }
     return (
       <div className="max-w-3xl mx-auto p-8 text-center">
         <h1 className="text-3xl font-semibold mb-2">Access Denied</h1>
-        <p className="text-muted-foreground mb-4">You don't have permission to view this workspace.</p>
+        <p className="text-muted-foreground mb-4">You don&apos;t have permission to view this workspace.</p>
         <Link href="/workspaces" className="text-primary hover:underline">
           ← Back to workspaces
         </Link>
