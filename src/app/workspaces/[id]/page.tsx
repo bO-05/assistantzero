@@ -14,7 +14,8 @@ const COLOR_CLASSES: Record<string, string> = {
   slate: 'bg-slate-500/10 text-slate-600 border-slate-600',
 };
 
-export default async function WorkspacePage({ params }: { params: { id: string } }) {
+export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth0.getSession();
   const user = session?.user;
 
@@ -22,7 +23,7 @@ export default async function WorkspacePage({ params }: { params: { id: string }
     redirect('/');
   }
 
-  const workspace = await getWorkspace(params.id);
+  const workspace = await getWorkspace(id);
 
   if (!workspace) {
     notFound();
@@ -116,8 +117,8 @@ export default async function WorkspacePage({ params }: { params: { id: string }
             {!workspace.isDefault && (
               <form action={async () => {
                 'use server';
-                await setDefaultWorkspace(params.id);
-                redirect('/workspaces/' + params.id);
+                await setDefaultWorkspace(id);
+                redirect('/workspaces/' + id);
               }}>
                 <button
                   type="submit"
@@ -130,7 +131,7 @@ export default async function WorkspacePage({ params }: { params: { id: string }
             )}
 
             <Link
-              href={`/workspaces/${params.id}/settings`}
+              href={`/workspaces/${id}/settings`}
               className="w-full border-2 border-console bg-pale hover:bg-mint px-4 py-3 font-ibm-plex-mono text-sm font-bold text-console transition-colors flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />
@@ -140,7 +141,7 @@ export default async function WorkspacePage({ params }: { params: { id: string }
             {!workspace.isDefault && (
               <form action={async () => {
                 'use server';
-                await deleteWorkspace(params.id);
+                await deleteWorkspace(id);
                 redirect('/workspaces');
               }}>
                 <button
