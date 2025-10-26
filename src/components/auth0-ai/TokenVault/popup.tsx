@@ -9,7 +9,7 @@ import { TokenVaultAuthProps } from "./TokenVaultAuthProps";
 export function TokenVaultConsentPopup({
   interrupt: { connection, requiredScopes, resume },
   connectWidget: { icon, title, description, action, containerClassName },
-  auth: { authorizePath = "/auth/login", returnTo = "/close" } = {},
+  auth: { authorizePath = "/api/auth/login", returnTo = "/close" } = {},
   onFinish,
 }: TokenVaultAuthProps) {
   const [isLoading, setIsLoading] = useState(false);
