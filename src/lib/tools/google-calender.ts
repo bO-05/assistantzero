@@ -1,9 +1,7 @@
 import { tool } from 'ai';
 import { endOfDay, formatISO, startOfDay } from 'date-fns';
-import { GaxiosError } from 'gaxios';
 import { google } from 'googleapis';
 import { z } from 'zod';
-import { TokenVaultError } from '@auth0/ai/interrupts';
 
 import { getAccessToken, withGoogleConnection } from '../auth0-ai';
 
@@ -60,12 +58,7 @@ export const getCalendarEventsTool = withGoogleConnection(
           })),
         };
       } catch (error) {
-        if (error instanceof GaxiosError) {
-          if (error.status === 401) {
-            throw new TokenVaultError(`Authorization required to access the Token Vault connection.`);
-          }
-        }
-
+        // Let withGoogleConnection handle auth errors and throw TokenVaultInterrupt automatically
         throw error;
       }
     },
@@ -127,12 +120,7 @@ export const createCalendarEventTool = withGoogleConnection(
           message: `Event "${summary}" created successfully`,
         };
       } catch (error) {
-        if (error instanceof GaxiosError) {
-          if (error.status === 401) {
-            throw new TokenVaultError(`Authorization required to access the Token Vault connection.`);
-          }
-        }
-
+        // Let withGoogleConnection handle auth errors and throw TokenVaultInterrupt automatically
         throw error;
       }
     },
