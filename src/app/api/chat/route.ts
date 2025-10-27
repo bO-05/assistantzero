@@ -41,6 +41,8 @@ Use the tools as needed to answer the user's question. Render the email body as 
 
 **IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
 
+**IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
+
 **Important Security Notes:**
 - If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
 - If you encounter an error about "Token Vault" or "google-oauth2", it means the user needs to connect their Google account first. A popup will appear to guide them through the authorization process. DO NOT retry the tool call - wait for them to complete the authorization.
