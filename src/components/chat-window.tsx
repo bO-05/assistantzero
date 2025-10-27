@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { ArrowDown, ArrowUpIcon, LoaderCircle, Trash2 } from 'lucide-react';
 import { useInterruptions } from '@auth0/ai-vercel/react';
+import { useSearchParams } from 'next/navigation';
 
 import { TokenVaultInterruptHandler } from '@/components/auth0-ai/TokenVault/TokenVaultInterruptHandler';
 import { ChatMessageBubble } from '@/components/chat-message-bubble';
@@ -163,10 +164,13 @@ export function ChatWindow(props: {
   placeholder?: string;
   emoji?: string;
 }) {
+  const searchParams = useSearchParams();
+  const threadId = searchParams.get('thread') || 'assistant0-chat';
+  
   const { messages, sendMessage, status, toolInterrupt, stop, setMessages } = useInterruptions((handler) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useChat({
-      id: 'assistant0-chat',
+      id: threadId,
       transport: new DefaultChatTransport({ api: props.endpoint }),
       generateId,
       onError: handler((e: Error) => {
@@ -241,22 +245,22 @@ export function ChatWindow(props: {
   useEffect(() => {
     async function loadHistory() {
       try {
-        // Try loading from database first
-        const response = await fetch('/api/chat/history');
+        // Try loading from database for current thread
+        const response = await fetch(`/api/chat/history?thread=${threadId}`);
         if (response.ok) {
           const dbMessages = await response.json();
           if (Array.isArray(dbMessages) && dbMessages.length > 0) {
             // Extract content from DB format
             const messages = dbMessages.map((msg: any) => msg.content);
             setMessages(messages);
-            console.log('Loaded', messages.length, 'messages from database');
+            console.log('Loaded', messages.length, 'messages from database for thread:', threadId);
             return;
           }
         }
         
         // Fallback to localStorage
         if (typeof window !== 'undefined') {
-          const stored = localStorage.getItem('assistant0-chat-messages');
+          const stored = localStorage.getItem(`chat-${threadId}`);
           if (stored) {
             const parsed = JSON.parse(stored) as UIMessage[];
             if (parsed && parsed.length > 0) {
@@ -271,14 +275,14 @@ export function ChatWindow(props: {
     }
     
     loadHistory();
-  }, [setMessages]);
+  }, [threadId, setMessages]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     if (typeof window !== 'undefined' && messages.length > 0) {
-      localStorage.setItem('assistant0-chat-messages', JSON.stringify(messages));
+      localStorage.setItem(`chat-${threadId}`, JSON.stringify(messages));
     }
-  }, [messages]);
+  }, [messages, threadId]);
 
   const [input, setInput] = useState('');
 
@@ -288,7 +292,7 @@ export function ChatWindow(props: {
   function handleClearChat() {
     if (confirm('Clear all chat history? This cannot be undone.')) {
       setMessages([]);
-      localStorage.removeItem('assistant0-chat-messages');
+      localStorage.removeItem(`chat-${threadId}`);
       toast.success('Chat history cleared');
     }
   }

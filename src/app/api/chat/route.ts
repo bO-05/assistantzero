@@ -150,6 +150,7 @@ export async function POST(req: NextRequest) {
       await db.insert(chatMessages).values({
         id: lastMessage.id || generateId(),
         userId: user.sub,
+        threadId: id, // Use chat thread ID
         role: 'user',
         content: lastMessage as any, // Store full message
         createdAt: new Date(),

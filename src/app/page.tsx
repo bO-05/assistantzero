@@ -1,12 +1,14 @@
 import { LogIn, UserPlus, Terminal, Zap, Lock, Cpu } from 'lucide-react';
+import { Suspense } from 'react';
 import { ChatWindow } from '@/components/chat-window';
+import { ChatSidebar } from '@/components/chat-sidebar';
 import { GuideInfoBox } from '@/components/guide/GuideInfoBox';
 import { auth0 } from '@/lib/auth0';
 
 export default async function Home() {
   const session = await auth0.getSession();
 
-  // If logged in, show the chat interface
+  // If logged in, show the chat interface with sidebar
   if (session) {
     const InfoCard = (
       <GuideInfoBox>
@@ -22,12 +24,24 @@ export default async function Home() {
     );
 
     return (
-      <ChatWindow
-        endpoint="api/chat"
-        emoji="🤖"
-        placeholder={`Hello ${session?.user?.name}, I'm your personal assistant. How can I help you today?`}
-        emptyStateComponent={InfoCard}
-      />
+      <div className="flex h-screen">
+        {/* ChatGPT-style sidebar */}
+        <Suspense fallback={<div className="w-64 border-r-2 border-console bg-pale" />}>
+          <ChatSidebar className="w-64 hidden md:block" />
+        </Suspense>
+
+        {/* Main chat area */}
+        <div className="flex-1 relative">
+          <Suspense fallback={<div>Loading...</div>}>
+            <ChatWindow
+              endpoint="api/chat"
+              emoji="🤖"
+              placeholder={`Hello ${session?.user?.name}, I'm your personal assistant. How can I help you today?`}
+              emptyStateComponent={InfoCard}
+            />
+          </Suspense>
+        </div>
+      </div>
     );
   }
 

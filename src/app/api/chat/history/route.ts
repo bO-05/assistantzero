@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
-import { desc, eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { desc, eq, and } from 'drizzle-orm';
 
 import { auth0 } from '@/lib/auth0';
 import { db } from '@/lib/db';
 import { chatMessages } from '@/lib/db/schema/chat-messages';
 
 /**
- * GET /api/chat/history
- * Returns chat message history for the authenticated user
+ * GET /api/chat/history?thread=xxx
+ * Returns chat message history for a specific thread
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth0.getSession();
     const userId = session?.user?.sub;
@@ -18,13 +18,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get last 50 messages for this user
+    const threadId = req.nextUrl.searchParams.get('thread') || 'assistant0-chat';
+
+    // Get messages for this thread
     const history = await db
       .select()
       .from(chatMessages)
-      .where(eq(chatMessages.userId, userId))
+      .where(
+        and(
+          eq(chatMessages.userId, userId),
+          eq(chatMessages.threadId, threadId)
+        )
+      )
       .orderBy(desc(chatMessages.createdAt))
-      .limit(50);
+      .limit(100);
 
     // Return in chronological order (oldest first)
     return NextResponse.json(history.reverse());
