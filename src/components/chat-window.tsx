@@ -12,6 +12,7 @@ import { TokenVaultInterruptHandler } from '@/components/auth0-ai/TokenVault/Tok
 import { ChatMessageBubble } from '@/components/chat-message-bubble';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
+import { StepUpAuthModal } from '@/components/step-up-auth-modal';
 
 function TypingIndicator(props: { aiEmoji?: string }) {
   return (
@@ -142,6 +143,20 @@ function StickyToBottomContent(props: {
   );
 }
 
+function getToolDisplayName(toolName: string): string {
+  const names: Record<string, string> = {
+    gmailSearchTool: '📧 Searching Gmail',
+    gmailDraftTool: '📧 Drafting Email',
+    getCalendarEventsTool: '📅 Checking Calendar',
+    createCalendarEventTool: '📅 Creating Calendar Event',
+    exaSearchTool: '🔍 Searching Web',
+    shopOnlineTool: '🛒 Shopping',
+    getContextDocumentsTool: '📄 Searching Documents',
+    getUserInfoTool: '👤 Getting User Info',
+  };
+  return names[toolName] || '⚙️ Running tool';
+}
+
 export function ChatWindow(props: {
   endpoint: string;
   emptyStateComponent: ReactNode;
@@ -158,11 +173,50 @@ export function ChatWindow(props: {
         console.error('Error: ', e);
         toast.error(`Error while processing your request`, { description: e.message });
       }),
+      onToolCall: ({ toolCall }) => {
+        // Show real-time tool execution feedback
+        const toolDisplayName = getToolDisplayName(toolCall.toolName);
+        toast.info(toolDisplayName, {
+          duration: 2000,
+          icon: '⚙️',
+        });
+      },
     }),
   );
 
+  // State for step-up authentication modal
+  const [showStepUp, setShowStepUp] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ action: string; riskScore: string } | null>(null);
+
   // Disabled auto-continuation to prevent role ordering errors
   // The AI will respond naturally after tool execution without manual continuation
+
+  // Check for step-up requirement in messages
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'assistant') {
+      // Extract text content from message parts
+      const content = Array.isArray((lastMessage as any).parts)
+        ? (lastMessage as any).parts
+            .map((p: any) => {
+              if (typeof p === 'string') return p;
+              if (typeof p?.text === 'string') return p.text;
+              if (typeof p?.content === 'string') return p.content;
+              return '';
+            })
+            .join('')
+        : ((lastMessage as any).content ?? '');
+      
+      // Check if message indicates step-up is required
+      if (content.includes('requires step-up') || content.includes('requires_step_up') || content.includes('requiresStepUp')) {
+        setShowStepUp(true);
+        setPendingAction({
+          action: 'High-risk operation',
+          riskScore: 'HIGH',
+        });
+      }
+    }
+  }, [messages]);
 
   // Load messages from localStorage on mount
   useEffect(() => {
@@ -214,11 +268,23 @@ export function ChatWindow(props: {
   }
 
   return (
-    <StickToBottom>
-      <StickyToBottomContent
-        className="absolute inset-0"
-        contentClassName="py-8 px-2"
-        content={
+    <>
+      <StepUpAuthModal
+        isOpen={showStepUp}
+        onClose={() => setShowStepUp(false)}
+        onApprove={() => {
+          setShowStepUp(false);
+          toast.success('✅ Action approved! (In production, this would use Auth0 Guardian)');
+        }}
+        action={pendingAction?.action || 'High-risk operation'}
+        riskScore={pendingAction?.riskScore || 'HIGH'}
+      />
+      
+      <StickToBottom>
+        <StickyToBottomContent
+          className="absolute inset-0"
+          contentClassName="py-8 px-2"
+          content={
           messages.length === 0 ? (
             <div>{props.emptyStateComponent}</div>
           ) : (
@@ -264,6 +330,7 @@ export function ChatWindow(props: {
           </div>
         }
       ></StickyToBottomContent>
-    </StickToBottom>
+      </StickToBottom>
+    </>
   );
 }
