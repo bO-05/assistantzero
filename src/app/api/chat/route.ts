@@ -5,6 +5,7 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   convertToModelMessages,
+  stepCountIs,
 } from 'ai';
 import { mistral } from '@ai-sdk/mistral';
 import { setAIContext } from '@auth0/ai-vercel';
@@ -39,9 +40,11 @@ Use the tools as needed to answer the user's question. Render the email body as 
 - When user asks to CHECK calendar events, use getCalendarEventsTool - this only reads events
 - After creating a draft email, tell the user: "I've created a draft email in your Gmail. Please review and click Send when ready."
 
-**IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
-
-**IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
+**CRITICAL RESPONSE RULES:**
+- ALWAYS provide a detailed response after using tools
+- NEVER end your turn immediately after a tool call - always explain what you found or did
+- When searching emails, summarize the results and ask if the user wants you to proceed
+- Chain multiple tool calls when needed to complete a complex task
 
 **Important Security Notes:**
 - If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
@@ -169,6 +172,7 @@ export async function POST(req: NextRequest) {
           system: AGENT_SYSTEM_TEMPLATE,
           messages: modelMessages,
           tools: auditedTools as any,
+          stopWhen: stepCountIs(10),
           onFinish: (output) => {
             if (output.finishReason === 'tool-calls') {
               const lastMessage = output.content[output.content.length - 1];
