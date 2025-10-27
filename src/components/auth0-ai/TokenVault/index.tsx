@@ -14,15 +14,7 @@ export function TokenVaultConsent(props: TokenVaultAuthProps) {
       return <TokenVaultConsentRedirect {...props} />;
     case 'auto':
     default:
-      return (
-        <>
-          <BrowserView>
-            <TokenVaultConsentPopup {...props} />
-          </BrowserView>
-          <MobileView>
-            <TokenVaultConsentRedirect {...props} />
-          </MobileView>
-        </>
-      );
+      // Use redirect for all devices to avoid COOP issues with popup
+      return <TokenVaultConsentRedirect {...props} />;
   }
 }
