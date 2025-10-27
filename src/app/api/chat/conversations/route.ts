@@ -18,20 +18,49 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get conversations with message count and last message
-    const conversations = await db
-      .select({
-        threadId: chatMessages.threadId,
-        title: chatMessages.title,
-        messageCount: sql<number>`count(*)::int`,
-        lastMessage: sql<string>`substring(cast(${chatMessages.content}->>'content' as text), 1, 100)`,
-        createdAt: sql<Date>`max(${chatMessages.createdAt})`,
-      })
+    // Get all messages and group them in JS (simpler than complex SQL)
+    const allMessages = await db
+      .select()
       .from(chatMessages)
       .where(eq(chatMessages.userId, userId))
-      .groupBy(chatMessages.threadId, chatMessages.title)
-      .orderBy(desc(sql`max(${chatMessages.createdAt})`))
-      .limit(20);
+      .orderBy(desc(chatMessages.createdAt));
+
+    // Group by threadId
+    const conversationsMap = new Map<string, any>();
+    
+    for (const msg of allMessages) {
+      const threadId = msg.threadId || 'assistant0-chat';
+      
+      if (!conversationsMap.has(threadId)) {
+        // Extract first message text for preview
+        let lastMessage = 'New conversation';
+        try {
+          const content = msg.content as any;
+          if (typeof content === 'string') {
+            lastMessage = content.substring(0, 100);
+          } else if (Array.isArray(content?.parts)) {
+            const firstText = content.parts.find((p: any) => p?.text || p?.content);
+            lastMessage = (firstText?.text || firstText?.content || '').substring(0, 100);
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        conversationsMap.set(threadId, {
+          threadId,
+          title: msg.title || `Chat ${new Date(msg.createdAt).toLocaleDateString()}`,
+          messageCount: 1,
+          lastMessage,
+          createdAt: msg.createdAt,
+        });
+      } else {
+        conversationsMap.get(threadId).messageCount++;
+      }
+    }
+
+    const conversations = Array.from(conversationsMap.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 20);
 
     return NextResponse.json(conversations);
   } catch (error) {
