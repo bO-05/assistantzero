@@ -289,11 +289,21 @@ export function ChatWindow(props: {
   const isChatLoading = status === 'streaming';
 
   // Clear chat history function
-  function handleClearChat() {
+  async function handleClearChat() {
     if (confirm('Clear all chat history? This cannot be undone.')) {
       setMessages([]);
       localStorage.removeItem(`chat-${threadId}`);
-      toast.success('Chat history cleared');
+      
+      // Also delete from database
+      try {
+        await fetch(`/api/chat/conversations/${threadId}`, {
+          method: 'DELETE',
+        });
+        toast.success('Chat history cleared');
+      } catch (error) {
+        console.error('Failed to delete from database:', error);
+        toast.success('Chat history cleared from browser');
+      }
     }
   }
 

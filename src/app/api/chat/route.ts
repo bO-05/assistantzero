@@ -194,7 +194,23 @@ export async function POST(req: NextRequest) {
           messages: modelMessages,
           tools: auditedTools as any,
           stopWhen: stepCountIs(10),
-          onFinish: (output) => {
+          onFinish: async (output) => {
+            // Save assistant response to database
+            if (user?.sub) {
+              try {
+                await db.insert(chatMessages).values({
+                  id: generateId(),
+                  userId: user.sub,
+                  threadId: id,
+                  role: 'assistant',
+                  content: { parts: output.content } as any,
+                  createdAt: new Date(),
+                });
+              } catch (error) {
+                console.error('Failed to save assistant message:', error);
+              }
+            }
+
             if (output.finishReason === 'tool-calls') {
               const lastMessage = output.content[output.content.length - 1];
               if (lastMessage?.type === 'tool-error') {
