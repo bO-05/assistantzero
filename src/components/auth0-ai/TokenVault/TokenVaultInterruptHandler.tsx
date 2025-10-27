@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { TokenVaultInterrupt } from '@auth0/ai/interrupts';
 import type { Auth0InterruptionUI } from '@auth0/ai-vercel';
 
-import { TokenVaultConsentPopup } from '@/components/auth0-ai/TokenVault/popup';
+import { TokenVaultConsentRedirect } from '@/components/auth0-ai/TokenVault/redirect';
 
 type PossibleInterrupt = Auth0InterruptionUI | Record<string, unknown>;
 
@@ -22,15 +22,15 @@ export function TokenVaultInterruptHandler({ interrupt, onFinish }: TokenVaultIn
     return null;
   }
 
-  console.log('Rendering TokenVaultConsentPopup for:', interrupt);
+  console.log('Rendering TokenVaultConsent (redirect mode) for:', interrupt);
 
   return (
     <div key={id} className="whitespace-pre-wrap border-2 border-accent-orange bg-pale p-6 mb-4">
-      <TokenVaultConsentPopup
+      <TokenVaultConsentRedirect
         interrupt={interrupt}
         connectWidget={{
           title: '🔐 Google Authorization Required',
-          description: interrupt.message || 'You need to connect your Google account to access Gmail.',
+          description: interrupt.message || 'You need to connect your Google account to access Gmail/Calendar.',
           action: { label: 'Connect Google Account' },
         }}
         onFinish={onFinish}
