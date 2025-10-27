@@ -252,6 +252,21 @@ export function ChatWindow(props: {
           if (Array.isArray(dbMessages) && dbMessages.length > 0) {
             // Extract content from DB format
             const messages = dbMessages.map((msg: any) => msg.content);
+            
+            // CRITICAL: Don't load messages with TokenVault errors - they prevent new interrupts
+            const hasTokenVaultError = messages.some((msg: any) => 
+              JSON.stringify(msg).toLowerCase().includes('token vault') ||
+              JSON.stringify(msg).toLowerCase().includes('authorization required')
+            );
+            
+            if (hasTokenVaultError) {
+              console.warn('🔄 Detected TokenVault error in history - clearing for fresh auth attempt');
+              // Clear the conversation to allow fresh interrupt
+              await fetch(`/api/chat/conversations/${threadId}`, { method: 'DELETE' });
+              localStorage.removeItem(`chat-${threadId}`);
+              return;
+            }
+            
             setMessages(messages);
             console.log('Loaded', messages.length, 'messages from database for thread:', threadId);
             return;

@@ -5,7 +5,14 @@ import { getRefreshToken, getUser } from './auth0';
 
 // Get the access token for a connection via Auth0
 // NOTE: This returns the token synchronously from context, not async!
-export const getAccessToken = () => getAccessTokenFromTokenVault();
+// Throws TokenVaultInterrupt if token is not available
+export const getAccessToken = () => {
+  const token = getAccessTokenFromTokenVault();
+  if (!token) {
+    throw new Error('Access token not available from Token Vault');
+  }
+  return token;
+};
 
 const auth0AI = new Auth0AI();
 

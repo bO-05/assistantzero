@@ -12,7 +12,14 @@ export const auth0 = new Auth0Client({
 // Get the refresh token from Auth0 session
 export const getRefreshToken = async () => {
   const session = await auth0.getSession();
-  return session?.tokenSet?.refreshToken;
+  const refreshToken = session?.tokenSet?.refreshToken;
+  
+  // Log for debugging - if null, user needs to authorize with offline_access
+  if (!refreshToken) {
+    console.warn('⚠️ No refresh token found in session - user needs to connect Google account with offline_access');
+  }
+  
+  return refreshToken;
 };
 
 export const getUser = async () => {
