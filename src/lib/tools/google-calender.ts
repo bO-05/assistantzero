@@ -12,8 +12,8 @@ export const getCalendarEventsTool = withGoogleConnection(
       date: z.coerce.date().describe('The date to check for events'),
     }),
     execute: async ({ date }) => {
-      // Get the access token from Auth0 AI
-      const accessToken = await getAccessToken();
+      // Get the access token from Auth0 AI (synchronously from context)
+      const accessToken = getAccessToken();
 
       // Google SDK
       try {
@@ -77,8 +77,8 @@ export const createCalendarEventTool = withGoogleConnection(
       attendees: z.array(z.string()).optional().describe('Optional array of attendee email addresses. Invitations will be sent.'),
     }),
     execute: async ({ summary, description, startTime, endTime, location, attendees }) => {
-      // Get the access token from Auth0 AI
-      const accessToken = await getAccessToken();
+      // Get the access token from Auth0 AI (synchronously from context)
+      const accessToken = getAccessToken();
 
       // Google SDK
       try {

@@ -4,7 +4,8 @@ import { AccessDeniedInterrupt } from '@auth0/ai/interrupts';
 import { getRefreshToken, getUser } from './auth0';
 
 // Get the access token for a connection via Auth0
-export const getAccessToken = async () => getAccessTokenFromTokenVault();
+// NOTE: This returns the token synchronously from context, not async!
+export const getAccessToken = () => getAccessTokenFromTokenVault();
 
 const auth0AI = new Auth0AI();
 
