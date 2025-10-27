@@ -42,11 +42,9 @@ export function PromptUserContainer({
 
       {action && (
         <div className="w-full sm:w-fit">
-          <Button asChild variant="default" size="default" onClick={action.onClick}>
-            <a className="flex items-center gap-2">
-              <LogIn />
-              <span>{action.label}</span>
-            </a>
+          <Button variant="default" size="default" onClick={action.onClick} type="button">
+            <LogIn />
+            <span>{action.label}</span>
           </Button>
         </div>
       )}
