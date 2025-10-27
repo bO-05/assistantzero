@@ -6,6 +6,7 @@ import {
   createUIMessageStreamResponse,
   convertToModelMessages,
   stepCountIs,
+  generateId,
 } from 'ai';
 import { mistral } from '@ai-sdk/mistral';
 import { setAIContext } from '@auth0/ai-vercel';
@@ -21,6 +22,8 @@ import { auth0 } from '@/lib/auth0';
 import { AuditLogger, type AuditContext } from '@/lib/audit/logger';
 import { assessRisk } from '@/lib/risk/assessor';
 import { ensureDefaultWorkspace } from '@/lib/workspaces/helpers';
+import { db } from '@/lib/db';
+import { chatMessages } from '@/lib/db/schema/chat-messages';
 
 const date = new Date().toISOString();
 const mistralModelId = process.env.MISTRAL_CHAT_MODEL ?? 'mistral-small-latest';
@@ -138,6 +141,23 @@ export async function POST(req: NextRequest) {
   if (user?.sub && user.email) {
     const workspace = await ensureDefaultWorkspace(user.sub, user.email);
     workspaceId = workspace?.id;
+  }
+
+  // Save user message to database
+  const lastMessage = messages[messages.length - 1];
+  if (user?.sub && lastMessage?.role === 'user') {
+    try {
+      await db.insert(chatMessages).values({
+        id: lastMessage.id || generateId(),
+        userId: user.sub,
+        role: 'user',
+        content: lastMessage as any, // Store full message
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.error('Failed to save user message:', error);
+      // Don't block chat if save fails
+    }
   }
 
   const baseTools = {

@@ -1,0 +1,16 @@
+import { pgTable, varchar, timestamp, jsonb } from 'drizzle-orm/pg-core';
+
+/**
+ * Chat messages table for persisting conversations
+ * Stores full UIMessage objects for perfect reconstruction
+ */
+export const chatMessages = pgTable('chat_messages', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).notNull(), // 'user' | 'assistant' | 'tool'
+  content: jsonb('content').notNull(), // Full message content
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type NewChatMessage = typeof chatMessages.$inferInsert;

@@ -237,21 +237,40 @@ export function ChatWindow(props: {
     }
   }, [messages]);
 
-  // Load messages from localStorage on mount
+  // Load messages from database on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('assistant0-chat-messages');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as UIMessage[];
-          if (parsed && parsed.length > 0) {
-            setMessages(parsed);
+    async function loadHistory() {
+      try {
+        // Try loading from database first
+        const response = await fetch('/api/chat/history');
+        if (response.ok) {
+          const dbMessages = await response.json();
+          if (Array.isArray(dbMessages) && dbMessages.length > 0) {
+            // Extract content from DB format
+            const messages = dbMessages.map((msg: any) => msg.content);
+            setMessages(messages);
+            console.log('Loaded', messages.length, 'messages from database');
+            return;
           }
-        } catch (e) {
-          console.error('Failed to load chat history:', e);
         }
+        
+        // Fallback to localStorage
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('assistant0-chat-messages');
+          if (stored) {
+            const parsed = JSON.parse(stored) as UIMessage[];
+            if (parsed && parsed.length > 0) {
+              setMessages(parsed);
+              console.log('Loaded', parsed.length, 'messages from localStorage');
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load chat history:', e);
       }
     }
+    
+    loadHistory();
   }, [setMessages]);
 
   // Save messages to localStorage whenever they change
