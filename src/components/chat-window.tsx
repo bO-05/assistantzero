@@ -161,27 +161,8 @@ export function ChatWindow(props: {
     }),
   );
 
-  // Auto-continue after tool calls complete
-  useEffect(() => {
-    if (status !== 'streaming' && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'assistant') {
-        const parts = (lastMessage as any).parts;
-        if (Array.isArray(parts)) {
-          const hasToolCalls = parts.some((p: any) => p?.type?.startsWith('tool-'));
-          const hasTextContent = parts.some((p: any) => typeof p === 'string' || (p?.type === 'text' && p?.text));
-          
-          // If there are tool calls but no text response, continue automatically
-          if (hasToolCalls && !hasTextContent && !toolInterrupt) {
-            console.log('Tool calls completed, continuing conversation...');
-            setTimeout(() => {
-              sendMessage({ text: '' });
-            }, 500);
-          }
-        }
-      }
-    }
-  }, [messages, status, sendMessage, toolInterrupt]);
+  // Disabled auto-continuation to prevent role ordering errors
+  // The AI will respond naturally after tool execution without manual continuation
 
   // Load messages from localStorage on mount
   useEffect(() => {
