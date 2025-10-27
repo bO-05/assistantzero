@@ -5,9 +5,11 @@ import { GmailCreateDraft, GmailSearch, GmailSendMessage } from '@langchain/comm
 import { getAccessToken, withGoogleConnection } from '../auth0-ai';
 
 // Provide the access token to the Gmail tools
+// LangChain tools expect accessToken to be string | () => Promise<string>
+// Wrap the sync getAccessToken in an async function for LangChain compatibility
 const gmailParams = {
   credentials: {
-    accessToken: getAccessToken,
+    accessToken: async () => getAccessToken(),
   },
 };
 
