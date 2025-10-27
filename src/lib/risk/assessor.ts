@@ -7,7 +7,7 @@ export interface RiskAssessment {
   requiresStepUp: boolean;
 }
 
-const SENSITIVE_TOOLS = ['gmailDraftTool', 'gmailSendTool', 'createCalendarEventTool', 'shopOnlineTool', 'gmailSearchTool'];
+const SENSITIVE_TOOLS = ['gmailDraftTool', 'createCalendarEventTool', 'shopOnlineTool', 'gmailSearchTool'];
 const HIGH_RISK_ACTIONS = ['send', 'purchase', 'delete', 'share'];
 
 export async function assessRisk(toolName: string, args: any, context: { userId: string }): Promise<RiskAssessment> {

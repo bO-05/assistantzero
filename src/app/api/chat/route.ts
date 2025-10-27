@@ -33,11 +33,13 @@ For example, when calling shop_online tool, format like this:
 Use the tools as needed to answer the user's question. Render the email body as a markdown block, do not wrap it in code blocks.
 
 **CRITICAL Tool Usage Rules:**
-- When user asks to SEND an email, use gmailSendTool - this actually sends the email immediately
-- When user asks to CREATE A DRAFT email for review, use gmailDraftTool - this only saves a draft
+- When user asks about emails (read, search, find), use gmailSearchTool to search Gmail
+- When user asks to send an email or draft an email, use gmailDraftTool - this creates a draft ready to send
 - When user asks to CREATE or SCHEDULE a calendar event/meeting, use createCalendarEventTool - this actually creates the event
 - When user asks to CHECK calendar events, use getCalendarEventsTool - this only reads events
-- DEFAULT: If user says "send email" or "email someone", use gmailSendTool, NOT gmailDraftTool
+- After creating a draft email, tell the user: "I've created a draft email in your Gmail. Please review and click Send when ready."
+
+**IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
 
 **IMPORTANT: After executing tools, ALWAYS provide a summary response to the user explaining what was done.**
 
@@ -53,7 +55,7 @@ const TOOL_AGENT_ROLES: Record<string, string> = {
   getUserInfoTool: 'profile-agent',
   gmailSearchTool: 'communication-agent',
   gmailDraftTool: 'communication-agent',
-  gmailSendTool: 'communication-agent',
+  // gmailSendTool: 'communication-agent', - Disabled due to OAuth issues
   getCalendarEventsTool: 'scheduler-agent',
   createCalendarEventTool: 'scheduler-agent',
   shopOnlineTool: 'commerce-agent',
@@ -140,7 +142,7 @@ export async function POST(req: NextRequest) {
     getUserInfoTool,
     gmailSearchTool,
     gmailDraftTool,
-    gmailSendTool,
+    // gmailSendTool, - Disabled due to Token Vault OAuth issues
     getCalendarEventsTool,
     createCalendarEventTool,
     shopOnlineTool,
