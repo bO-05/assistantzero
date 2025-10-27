@@ -12,8 +12,8 @@ import { errorSerializer, withInterruptions } from '@auth0/ai-vercel/interrupts'
 
 import { exaSearchTool } from '@/lib/tools/exa';
 import { getUserInfoTool } from '@/lib/tools/user-info';
-import { gmailDraftTool, gmailSearchTool } from '@/lib/tools/gmail';
-import { getCalendarEventsTool } from '@/lib/tools/google-calender';
+import { gmailDraftTool, gmailSearchTool, gmailSendTool } from '@/lib/tools/gmail';
+import { getCalendarEventsTool, createCalendarEventTool } from '@/lib/tools/google-calender';
 import { shopOnlineTool } from '@/lib/tools/shop-online';
 import { getContextDocumentsTool } from '@/lib/tools/context-docs';
 import { auth0 } from '@/lib/auth0';
@@ -32,6 +32,13 @@ For example, when calling shop_online tool, format like this:
 
 Use the tools as needed to answer the user's question. Render the email body as a markdown block, do not wrap it in code blocks.
 
+**CRITICAL Tool Usage Rules:**
+- When user asks to SEND an email, use gmailSendTool - this actually sends the email immediately
+- When user asks to CREATE A DRAFT email for review, use gmailDraftTool - this only saves a draft
+- When user asks to CREATE or SCHEDULE a calendar event/meeting, use createCalendarEventTool - this actually creates the event
+- When user asks to CHECK calendar events, use getCalendarEventsTool - this only reads events
+- DEFAULT: If user says "send email" or "email someone", use gmailSendTool, NOT gmailDraftTool
+
 **Important Security Notes:**
 - If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
 - If you encounter an error about "Token Vault" or "google-oauth2", it means the user needs to connect their Google account first. A popup will appear to guide them through the authorization process. DO NOT retry the tool call - wait for them to complete the authorization.
@@ -44,7 +51,9 @@ const TOOL_AGENT_ROLES: Record<string, string> = {
   getUserInfoTool: 'profile-agent',
   gmailSearchTool: 'communication-agent',
   gmailDraftTool: 'communication-agent',
+  gmailSendTool: 'communication-agent',
   getCalendarEventsTool: 'scheduler-agent',
+  createCalendarEventTool: 'scheduler-agent',
   shopOnlineTool: 'commerce-agent',
   getContextDocumentsTool: 'knowledge-agent',
 };
@@ -129,7 +138,9 @@ export async function POST(req: NextRequest) {
     getUserInfoTool,
     gmailSearchTool,
     gmailDraftTool,
+    gmailSendTool,
     getCalendarEventsTool,
+    createCalendarEventTool,
     shopOnlineTool,
     getContextDocumentsTool,
   };

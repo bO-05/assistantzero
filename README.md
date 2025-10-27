@@ -18,8 +18,6 @@ A smart AI assistant that helps you manage your digital life with enterprise-gra
 
 **Tool Integrations** - Search the web, manage emails, check calendars, and more - all secured by Auth0.
 
-📝 [View Changelog](./CHANGELOG.md)
-
 ## 🛠️ Tech Stack
 
 **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS, shadcn/ui
@@ -105,9 +103,9 @@ Copy `.env.example` to `.env.local` and configure:
 - `MISTRAL_CHAT_MODEL` / `MISTRAL_EMBEDDING_MODEL` - Override defaults
 
 📚 **Auth0 Setup Guides:**
-- [Token Vault Setup](https://auth0.com/ai/docs/call-others-apis-on-users-behalf)
-- [Enable CIBA Grant](https://auth0.com/ai/docs/call-your-apis-on-users-behalf) (required for async auth)
-- [Guardian Push Setup](https://auth0.com/ai/docs/async-authorization) (optional)
+- [Call Others' APIs on Users' Behalf](https://auth0.com/ai/docs/call-others-apis-on-users-behalf)
+- [Call Your APIs on Users' Behalf](https://auth0.com/ai/docs/call-your-apis-on-users-behalf) (required for async auth)
+- [Asynchronous Authorization](https://auth0.com/ai/docs/async-authorization) (optional)
 
 ### 3. Install & Initialize
 ```bash
