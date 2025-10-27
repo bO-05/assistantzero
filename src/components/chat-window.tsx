@@ -195,25 +195,44 @@ export function ChatWindow(props: {
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === 'assistant') {
-      // Extract text content from message parts
-      const content = Array.isArray((lastMessage as any).parts)
-        ? (lastMessage as any).parts
-            .map((p: any) => {
-              if (typeof p === 'string') return p;
-              if (typeof p?.text === 'string') return p.text;
-              if (typeof p?.content === 'string') return p.content;
-              return '';
-            })
-            .join('')
-        : ((lastMessage as any).content ?? '');
-      
-      // Check if message indicates step-up is required
-      if (content.includes('requires step-up') || content.includes('requires_step_up') || content.includes('requiresStepUp')) {
-        setShowStepUp(true);
-        setPendingAction({
-          action: 'High-risk operation',
-          riskScore: 'HIGH',
-        });
+      // Check tool results in message parts for step-up requirement
+      const parts = (lastMessage as any).parts;
+      console.log('Checking message for step-up:', { parts, lastMessage });
+      if (Array.isArray(parts)) {
+        for (const part of parts) {
+          // Check if this is a tool result that requires step-up
+          if (part?.type?.includes('tool-result') || part?.output) {
+            const output = part.output || part.result || part;
+            const outputStr = JSON.stringify(output).toLowerCase();
+            
+            if (outputStr.includes('requires_step_up') || outputStr.includes('requiresstepup')) {
+              setShowStepUp(true);
+              setPendingAction({
+                action: part.toolName || 'High-risk operation',
+                riskScore: output.riskLevel || 'HIGH',
+              });
+              return;
+            }
+          }
+          
+          // Also check text content for Guardian mentions
+          const text = typeof part === 'string' ? part : (part?.text || part?.content || '');
+          if (typeof text === 'string') {
+            const textLower = text.toLowerCase();
+            if (textLower.includes('auth0 guardian') || 
+                textLower.includes('requires step-up') || 
+                textLower.includes('high risk') ||
+                textLower.includes('guardian verification')) {
+              console.log('Step-up detected in text:', text);
+              setShowStepUp(true);
+              setPendingAction({
+                action: 'High-risk operation',
+                riskScore: 'HIGH',
+              });
+              return;
+            }
+          }
+        }
       }
     }
   }, [messages]);
