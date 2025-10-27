@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, type FormEvent, type ReactNode } from 'react';
-import { type UIMessage, DefaultChatTransport, generateId, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
+import { type UIMessage, DefaultChatTransport, generateId } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { toast } from 'sonner';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
@@ -158,9 +158,30 @@ export function ChatWindow(props: {
         console.error('Error: ', e);
         toast.error(`Error while processing your request`, { description: e.message });
       }),
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     }),
   );
+
+  // Auto-continue after tool calls complete
+  useEffect(() => {
+    if (status !== 'streaming' && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        const parts = (lastMessage as any).parts;
+        if (Array.isArray(parts)) {
+          const hasToolCalls = parts.some((p: any) => p?.type?.startsWith('tool-'));
+          const hasTextContent = parts.some((p: any) => typeof p === 'string' || (p?.type === 'text' && p?.text));
+          
+          // If there are tool calls but no text response, continue automatically
+          if (hasToolCalls && !hasTextContent && !toolInterrupt) {
+            console.log('Tool calls completed, continuing conversation...');
+            setTimeout(() => {
+              sendMessage({ text: '' });
+            }, 500);
+          }
+        }
+      }
+    }
+  }, [messages, status, sendMessage, toolInterrupt]);
 
   // Load messages from localStorage on mount
   useEffect(() => {

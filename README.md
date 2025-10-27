@@ -91,32 +91,47 @@ cd assistant0
 Copy `.env.example` to `.env.local` and configure:
 
 **Required:**
-- `MISTRAL_API_KEY` - Get from [Mistral AI](https://mistral.ai)
-- `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` - Create app at [Auth0](https://auth0.com)
+- `MISTRAL_API_KEY` - Get from [Mistral AI](https://console.mistral.ai)
+- `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` - Create app at [Auth0 Dashboard](https://manage.auth0.com)
 - `AUTH0_SECRET` - Generate with `openssl rand -hex 32`
 - `APP_BASE_URL` - `http://localhost:3000` (local) or your Vercel URL (production)
-- `FGA_STORE_ID`, `FGA_CLIENT_ID`, `FGA_CLIENT_SECRET`, `FGA_API_URL` - Create FGA store at [dashboard.fga.dev](https://dashboard.fga.dev)
-- `DATABASE_URL` - Postgres connection string
+- `DATABASE_URL` - PostgreSQL connection string (recommended: [Neon](https://neon.tech) with pgvector enabled)
+- `FGA_STORE_ID`, `FGA_CLIENT_ID`, `FGA_CLIENT_SECRET`, `FGA_API_URL`, `FGA_API_AUDIENCE`, `FGA_API_TOKEN_ISSUER` - Create FGA store at [dashboard.fga.dev](https://dashboard.fga.dev)
 
 **Optional:**
 - `EXA_API_KEY` - For enhanced web search ([exa.ai](https://exa.ai))
-- `MISTRAL_CHAT_MODEL` / `MISTRAL_EMBEDDING_MODEL` - Override defaults
+- `MISTRAL_CHAT_MODEL` - Override default model (default: `mistral-small-latest`)
+- `MISTRAL_EMBEDDING_MODEL` - Override embedding model (default: `mistral-embed`)
+- `AUTH0_CUSTOM_API_CLIENT_ID`, `AUTH0_CUSTOM_API_CLIENT_SECRET` - For async authorization/CIBA
+- `AUTH0_AUDIENCE`, `AUTH0_SCOPE` - Custom API audience and scopes
 
 📚 **Auth0 Setup Guides:**
 - [Call Others' APIs on Users' Behalf](https://auth0.com/ai/docs/call-others-apis-on-users-behalf)
 - [Call Your APIs on Users' Behalf](https://auth0.com/ai/docs/call-your-apis-on-users-behalf) (required for async auth)
 - [Asynchronous Authorization](https://auth0.com/ai/docs/async-authorization) (optional)
 
-### 3. Install & Initialize
+### 3. Set Up Database
+**Option A: Neon (Recommended for Production)**
+1. Create a free account at [Neon](https://neon.tech)
+2. Create a new project and enable pgvector extension
+3. Copy the connection string to `DATABASE_URL` in `.env.local`
+4. Run migrations: `npm run db:migrate`
+
+**Option B: Local PostgreSQL**
+1. Install PostgreSQL locally with pgvector extension
+2. Create database: `createdb ai_documents_db`
+3. Set `DATABASE_URL` in `.env.local`
+4. Run migrations: `npm run db:migrate`
+
+### 4. Initialize Auth0 FGA
 ```bash
 npm install
-npm run db:migrate          # Create database schema (if using local PostgreSQL)
 npm run fga:init            # Initialize FGA authorization model
 ```
 
-**Note:** If using Neon (recommended), database is already hosted. Just set `DATABASE_URL` in `.env.local`.
+After running `fga:init`, copy the generated `FGA_MODEL_ID` from console output and add it to `.env.local`.
 
-### 4. Run Development Server
+### 5. Run Development Server
 ```bash
 npm run dev
 ```
