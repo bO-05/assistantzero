@@ -128,18 +128,25 @@ function StickyToBottomContent(props: {
 }) {
   const context = useStickToBottomContext();
 
-  // scrollRef will also switch between overflow: unset to overflow: auto
+  // scrollRef will switch between overflow: unset and overflow: auto
+  // This is the scrollable container
   return (
-    <div
-      ref={context.scrollRef}
-      style={{ width: '100%', height: '100%' }}
-      className={cn('grid grid-rows-[1fr,auto] scrollbar-gutter-stable', props.className)}
-    >
-      <div ref={context.contentRef} className={props.contentClassName}>
-        {props.content}
+    <div className={cn('flex flex-col h-full', props.className)}>
+      <div
+        ref={context.scrollRef}
+        className="flex-1 overflow-y-auto scrollbar-gutter-stable"
+        style={{ minHeight: 0 }}
+      >
+        <div ref={context.contentRef} className={props.contentClassName}>
+          {props.content}
+        </div>
       </div>
-
-      {props.footer}
+      
+      {props.footer && (
+        <div className="flex-shrink-0">
+          {props.footer}
+        </div>
+      )}
     </div>
   );
 }
@@ -349,8 +356,7 @@ export function ChatWindow(props: {
       
       <StickToBottom>
         <StickyToBottomContent
-          className="h-full w-full"
-          contentClassName="py-20 px-4 pr-6"
+          contentClassName="pt-20 pb-4 px-4 pr-6"
           content={
           messages.length === 0 ? (
             <div>{props.emptyStateComponent}</div>
