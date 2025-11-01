@@ -128,13 +128,11 @@ function StickyToBottomContent(props: {
 }) {
   const context = useStickToBottomContext();
 
-  // scrollRef will switch between overflow: unset and overflow: auto
-  // This is the scrollable container
   return (
-    <div className={cn('flex flex-col h-full', props.className)}>
+    <div className="absolute inset-0 flex flex-col">
       <div
         ref={context.scrollRef}
-        className="flex-1 overflow-y-auto scrollbar-gutter-stable"
+        className="flex-1 overflow-y-auto"
         style={{ minHeight: 0 }}
       >
         <div ref={context.contentRef} className={props.contentClassName}>
@@ -142,11 +140,9 @@ function StickyToBottomContent(props: {
         </div>
       </div>
       
-      {props.footer && (
-        <div className="flex-shrink-0">
-          {props.footer}
-        </div>
-      )}
+      <div className="flex-shrink-0 bg-mint border-t-2 border-console">
+        {props.footer}
+      </div>
     </div>
   );
 }
@@ -354,10 +350,11 @@ export function ChatWindow(props: {
         riskScore={pendingAction?.riskScore || 'HIGH'}
       />
       
-      <StickToBottom>
-        <StickyToBottomContent
-          contentClassName="pt-20 pb-4 px-4 pr-6"
-          content={
+      <div className="absolute inset-0">
+        <StickToBottom>
+          <StickyToBottomContent
+            contentClassName="pt-4 pb-4 px-4"
+            content={
           messages.length === 0 ? (
             <div>{props.emptyStateComponent}</div>
           ) : (
@@ -380,30 +377,33 @@ export function ChatWindow(props: {
             </>
           )
         }
-        footer={
-          <div className="relative pb-8 px-4">
-            <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
-            {messages.length > 0 && (
-              <button
-                onClick={handleClearChat}
-                className="absolute bottom-full right-4 mb-4 border-2 border-console bg-pale hover:bg-red-100 px-3 py-1.5 font-ibm-plex-mono text-xs text-console hover:text-red-600 transition-colors flex items-center gap-1"
-              >
-                <Trash2 className="w-3 h-3" />
-                Clear Chat
-              </button>
-            )}
-            <ChatInput
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onSubmit={onSubmit}
-              loading={isChatLoading}
-              onStop={handleStop}
-              placeholder={props.placeholder ?? 'What can I help you with?'}
-            ></ChatInput>
-          </div>
-        }
-      ></StickyToBottomContent>
-      </StickToBottom>
+          footer={
+            <div className="p-4">
+              <div className="max-w-[768px] mx-auto relative">
+                <ScrollToBottom className="absolute -top-12 left-1/2 -translate-x-1/2" />
+                {messages.length > 0 && (
+                  <button
+                    onClick={handleClearChat}
+                    className="absolute -top-12 right-0 border-2 border-console bg-pale hover:bg-red-100 px-3 py-1.5 font-ibm-plex-mono text-xs text-console hover:text-red-600 transition-colors flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Clear Chat
+                  </button>
+                )}
+                <ChatInput
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onSubmit={onSubmit}
+                  loading={isChatLoading}
+                  onStop={handleStop}
+                  placeholder={props.placeholder ?? 'What can I help you with?'}
+                ></ChatInput>
+              </div>
+            </div>
+          }
+        ></StickyToBottomContent>
+        </StickToBottom>
+      </div>
     </>
   );
 }
