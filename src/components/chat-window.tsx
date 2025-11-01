@@ -375,7 +375,7 @@ export function ChatWindow(props: {
           )
         }
         footer={
-          <div className="pb-8 px-4">
+          <div className="relative pb-8 px-4">
             <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
             {messages.length > 0 && (
               <button
