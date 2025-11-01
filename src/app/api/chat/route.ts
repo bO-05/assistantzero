@@ -16,6 +16,9 @@ import { exaSearchTool } from '@/lib/tools/exa';
 import { getUserInfoTool } from '@/lib/tools/user-info';
 import { gmailDraftTool, gmailSearchTool, gmailSendTool } from '@/lib/tools/gmail';
 import { getCalendarEventsTool, createCalendarEventTool } from '@/lib/tools/google-calender';
+// Demo mode tools (no OAuth required - for hackathon judges)
+import { gmailSearchToolDemo, gmailDraftToolDemo } from '@/lib/tools/gmail-demo';
+import { getCalendarEventsToolDemo, createCalendarEventToolDemo } from '@/lib/tools/calendar-demo';
 import { shopOnlineTool } from '@/lib/tools/shop-online';
 import { getContextDocumentsTool } from '@/lib/tools/context-docs';
 import { auth0 } from '@/lib/auth0';
@@ -32,7 +35,11 @@ const date = new Date().toISOString();
 const MISTRAL_API_KEY = requireEnv('MISTRAL_API_KEY', 'Get your key from console.mistral.ai');
 const mistralModelId = process.env.MISTRAL_CHAT_MODEL ?? 'mistral-small-latest';
 
+const isDemoModeEnabled = process.env.NEXT_PUBLIC_DEMO === 'true';
+
 const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks.
+
+${isDemoModeEnabled ? '**🎬 DEMO MODE ACTIVE**: Gmail and Calendar tools are running in demonstration mode with example data. This is for hackathon presentation purposes.' : ''}
 
 You have access to a set of tools. When using tools, you MUST provide valid JSON arguments. Always format tool call arguments as proper JSON objects.
 For example, when calling shop_online tool, format like this:
@@ -46,6 +53,7 @@ Use the tools as needed to answer the user's question. Render the email body as 
 - When user asks to CREATE or SCHEDULE a calendar event/meeting, use createCalendarEventTool - this actually creates the event
 - When user asks to CHECK calendar events, use getCalendarEventsTool - this only reads events
 - After creating a draft email, tell the user: "I've created a draft email in your Gmail. Please review and click Send when ready."
+${isDemoModeEnabled ? '- In DEMO MODE, you are showing example data to demonstrate functionality. Make sure to explain this to users.' : ''}
 
 **CRITICAL RESPONSE RULES:**
 - ALWAYS provide a detailed response after using tools
@@ -54,8 +62,8 @@ Use the tools as needed to answer the user's question. Render the email body as 
 - Chain multiple tool calls when needed to complete a complex task
 
 **Important Security Notes:**
-- If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
-- If you encounter an error about "Token Vault" or "google-oauth2", it means the user needs to connect their Google account first. A popup will appear to guide them through the authorization process. DO NOT retry the tool call - wait for them to complete the authorization.
+${!isDemoModeEnabled ? `- If a tool response includes { "status": "requires_step_up" }, explain to the user that Auth0 Guardian/WebAuthn verification is required, instruct them to approve the request, and wait for their confirmation before retrying. Do not attempt to run that tool again automatically.
+- If you encounter an error about "Token Vault" or "google-oauth2", it means the user needs to connect their Google account first. A popup will appear to guide them through the authorization process. DO NOT retry the tool call - wait for them to complete the authorization.` : ''}
 - When appropriate, let the user know that the action has been logged in Mission Control for auditability.
 
 Today is ${date}.`;
@@ -206,7 +214,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const baseTools = {
+    // Use DEMO tools if DEMO mode is enabled (for hackathon judges)
+    // Set NEXT_PUBLIC_DEMO=true in environment to enable demo mode
+    const isDemoMode = process.env.NEXT_PUBLIC_DEMO === 'true';
+    
+    const baseTools = isDemoMode ? {
+      exaSearchTool,
+      getUserInfoTool,
+      gmailSearchTool: gmailSearchToolDemo,
+      gmailDraftTool: gmailDraftToolDemo,
+      getCalendarEventsTool: getCalendarEventsToolDemo,
+      createCalendarEventTool: createCalendarEventToolDemo,
+      shopOnlineTool,
+      getContextDocumentsTool,
+    } : {
       exaSearchTool,
       getUserInfoTool,
       gmailSearchTool,
