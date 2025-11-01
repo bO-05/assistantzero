@@ -1,5 +1,5 @@
 import { Auth0AI, getAccessTokenFromTokenVault } from '@auth0/ai-vercel';
-import { AccessDeniedInterrupt } from '@auth0/ai/interrupts';
+import { AccessDeniedInterrupt, TokenVaultInterrupt } from '@auth0/ai/interrupts';
 
 import { getRefreshToken, getUser } from './auth0';
 
@@ -7,11 +7,48 @@ import { getRefreshToken, getUser } from './auth0';
 // NOTE: This returns the token synchronously from context, not async!
 // Throws TokenVaultInterrupt if token is not available
 export const getAccessToken = () => {
-  const token = getAccessTokenFromTokenVault();
-  if (!token) {
-    throw new Error('Access token not available from Token Vault');
+  try {
+    const token = getAccessTokenFromTokenVault();
+    
+    // If getAccessTokenFromTokenVault returns null/undefined, throw TokenVaultInterrupt
+    if (!token) {
+      const scopes = [
+        'https://www.googleapis.com/auth/gmail.readonly',
+        'https://www.googleapis.com/auth/gmail.compose',
+        'https://www.googleapis.com/auth/gmail.send',
+        'https://www.googleapis.com/auth/calendar.events',
+      ];
+      
+      throw new TokenVaultInterrupt(
+        'You need to connect your Google account to access Gmail and Calendar features.',
+        'google-oauth2',
+        scopes,
+        scopes
+      );
+    }
+    
+    return token;
+  } catch (error) {
+    // If getAccessTokenFromTokenVault already threw TokenVaultInterrupt, re-throw it
+    if (error instanceof TokenVaultInterrupt) {
+      throw error;
+    }
+    
+    // Otherwise wrap in TokenVaultInterrupt
+    const scopes = [
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/gmail.compose',
+      'https://www.googleapis.com/auth/gmail.send',
+      'https://www.googleapis.com/auth/calendar.events',
+    ];
+    
+    throw new TokenVaultInterrupt(
+      'Authorization required to access your Google account.',
+      'google-oauth2',
+      scopes,
+      scopes
+    );
   }
-  return token;
 };
 
 const auth0AI = new Auth0AI();

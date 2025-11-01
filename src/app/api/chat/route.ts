@@ -113,8 +113,15 @@ function createAuditedTools(toolDefinitions: Record<string, any>, baseContext: A
               // Check if this is a TokenVaultInterrupt or other Auth0 interrupt
               // These should NOT be logged as errors - they're user prompts
               const errorName = (error as any)?.constructor?.name;
+              
               if (errorName === 'TokenVaultInterrupt' || errorName === 'AccessDeniedInterrupt' || (error as any)?.__interrupt) {
                 // This is an interrupt, not an error - let it bubble up to the interrupt handler
+                console.log(`🔐 TokenVaultInterrupt thrown for tool: ${toolName}`);
+                console.log('Interrupt details:', {
+                  connection: (error as any).connection,
+                  scopes: (error as any).scopes,
+                  message: (error as any).message,
+                });
                 throw error;
               }
               
@@ -175,124 +182,124 @@ export async function POST(req: NextRequest) {
       );
     }
 
-  let workspaceId: string | undefined;
-  if (user?.sub && user.email) {
-    const workspace = await ensureDefaultWorkspace(user.sub, user.email);
-    workspaceId = workspace?.id;
-  }
-
-  // Save user message to database
-  const lastMessage = messages[messages.length - 1];
-  if (user?.sub && lastMessage?.role === 'user') {
-    try {
-      await db.insert(chatMessages).values({
-        id: lastMessage.id || generateId(),
-        userId: user.sub,
-        threadId: id, // Use chat thread ID
-        role: 'user',
-        content: lastMessage as any, // Store full message
-        createdAt: new Date(),
-      });
-    } catch (error) {
-      console.error('Failed to save user message:', error);
-      // Don't block chat if save fails
+    let workspaceId: string | undefined;
+    if (user?.sub && user.email) {
+      const workspace = await ensureDefaultWorkspace(user.sub, user.email);
+      workspaceId = workspace?.id;
     }
-  }
 
-  const baseTools = {
-    exaSearchTool,
-    getUserInfoTool,
-    gmailSearchTool,
-    gmailDraftTool,
-    // gmailSendTool, - Disabled due to Token Vault OAuth issues
-    getCalendarEventsTool,
-    createCalendarEventTool,
-    shopOnlineTool,
-    getContextDocumentsTool,
-  };
-
-  const auditContext: AuditContext = {
-    userId: user?.sub ?? 'anonymous',
-    userEmail: user?.email ?? 'anonymous@example.com',
-    workspaceId,
-    threadId: id,
-  };
-
-  const auditedTools = createAuditedTools(baseTools, auditContext);
-
-  const modelMessages = convertToModelMessages(messages);
-
-  const stream = createUIMessageStream({
-    originalMessages: messages,
-    execute: withInterruptions(
-      async ({ writer }) => {
-        const result = streamText({
-          model: mistral(mistralModelId),
-          system: AGENT_SYSTEM_TEMPLATE,
-          messages: modelMessages,
-          tools: auditedTools as any,
-          stopWhen: stepCountIs(10),
-          onFinish: async (output) => {
-            // Save assistant response to database
-            if (user?.sub) {
-              try {
-                await db.insert(chatMessages).values({
-                  id: generateId(),
-                  userId: user.sub,
-                  threadId: id,
-                  role: 'assistant',
-                  content: { parts: output.content } as any,
-                  createdAt: new Date(),
-                });
-              } catch (error) {
-                console.error('Failed to save assistant message:', error);
-              }
-            }
-
-            if (output.finishReason === 'tool-calls') {
-              const lastMessage = output.content[output.content.length - 1];
-              if (lastMessage?.type === 'tool-error') {
-                const { toolName, toolCallId, error, input } = lastMessage;
-                const serializableError = {
-                  cause: error,
-                  toolCallId: toolCallId,
-                  toolName: toolName,
-                  toolArgs: input,
-                };
-
-                throw serializableError;
-              }
-            }
-          },
+    // Save user message to database
+    const lastMessage = messages[messages.length - 1];
+    if (user?.sub && lastMessage?.role === 'user') {
+      try {
+        await db.insert(chatMessages).values({
+          id: lastMessage.id || generateId(),
+          userId: user.sub,
+          threadId: id, // Use chat thread ID
+          role: 'user',
+          content: lastMessage as any, // Store full message
+          createdAt: new Date(),
         });
-
-        writer.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          }),
-        );
-      },
-      {
-        messages: messages,
-        tools: auditedTools as any,
-      },
-    ),
-    onError: errorSerializer((err) => {
-      console.error('Chat error:', err);
-      console.error('Error type:', (err as any)?.constructor?.name);
-      console.error('Error message:', (err as Error)?.message);
-      console.error('Is interrupt?:', (err as any)?.__interrupt);
-      
-      // Don't show generic error for interrupts
-      const errorName = (err as any)?.constructor?.name;
-      if (errorName === 'TokenVaultInterrupt' || errorName === 'AccessDeniedInterrupt') {
-        return ''; // Interrupt will be handled by TokenVaultInterruptHandler
+      } catch (error) {
+        console.error('Failed to save user message:', error);
+        // Don't block chat if save fails
       }
-      
-      const errorMessage = (err as Error)?.message || 'An unknown error occurred';
-      return `An error occurred: ${errorMessage}`;
-    }),
-  });
+    }
+
+    const baseTools = {
+      exaSearchTool,
+      getUserInfoTool,
+      gmailSearchTool,
+      gmailDraftTool,
+      // gmailSendTool, - Disabled due to Token Vault OAuth issues
+      getCalendarEventsTool,
+      createCalendarEventTool,
+      shopOnlineTool,
+      getContextDocumentsTool,
+    };
+
+    const auditContext: AuditContext = {
+      userId: user?.sub ?? 'anonymous',
+      userEmail: user?.email ?? 'anonymous@example.com',
+      workspaceId,
+      threadId: id,
+    };
+
+    const auditedTools = createAuditedTools(baseTools, auditContext);
+
+    const modelMessages = convertToModelMessages(messages);
+
+    const stream = createUIMessageStream({
+      originalMessages: messages,
+      execute: withInterruptions(
+        async ({ writer }) => {
+          const result = streamText({
+            model: mistral(mistralModelId),
+            system: AGENT_SYSTEM_TEMPLATE,
+            messages: modelMessages,
+            tools: auditedTools as any,
+            stopWhen: stepCountIs(10),
+            onFinish: async (output) => {
+              // Save assistant response to database
+              if (user?.sub) {
+                try {
+                  await db.insert(chatMessages).values({
+                    id: generateId(),
+                    userId: user.sub,
+                    threadId: id,
+                    role: 'assistant',
+                    content: { parts: output.content } as any,
+                    createdAt: new Date(),
+                  });
+                } catch (error) {
+                  console.error('Failed to save assistant message:', error);
+                }
+              }
+
+              if (output.finishReason === 'tool-calls') {
+                const lastMessage = output.content[output.content.length - 1];
+                if (lastMessage?.type === 'tool-error') {
+                  const { toolName, toolCallId, error, input } = lastMessage;
+                  const serializableError = {
+                    cause: error,
+                    toolCallId: toolCallId,
+                    toolName: toolName,
+                    toolArgs: input,
+                  };
+
+                  throw serializableError;
+                }
+              }
+            },
+          });
+
+          writer.merge(
+            result.toUIMessageStream({
+              sendReasoning: true,
+            }),
+          );
+        },
+        {
+          messages: messages,
+          tools: auditedTools as any,
+        },
+      ),
+      onError: errorSerializer((err) => {
+        console.error('Chat error:', err);
+        console.error('Error type:', (err as any)?.constructor?.name);
+        console.error('Error message:', (err as Error)?.message);
+        console.error('Is interrupt?:', (err as any)?.__interrupt);
+        
+        // Don't show generic error for interrupts
+        const errorName = (err as any)?.constructor?.name;
+        if (errorName === 'TokenVaultInterrupt' || errorName === 'AccessDeniedInterrupt') {
+          return ''; // Interrupt will be handled by TokenVaultInterruptHandler
+        }
+        
+        const errorMessage = (err as Error)?.message || 'An unknown error occurred';
+        return `An error occurred: ${errorMessage}`;
+      }),
+    });
 
     return createUIMessageStreamResponse({ stream });
   } catch (error) {
