@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   streamText,
   type UIMessage,
@@ -24,8 +24,12 @@ import { assessRisk } from '@/lib/risk/assessor';
 import { ensureDefaultWorkspace } from '@/lib/workspaces/helpers';
 import { db } from '@/lib/db';
 import { chatMessages } from '@/lib/db/schema/chat-messages';
+import { requireEnv } from '@/lib/env-validation';
 
 const date = new Date().toISOString();
+
+// Validate critical environment variables at module load
+const MISTRAL_API_KEY = requireEnv('MISTRAL_API_KEY', 'Get your key from console.mistral.ai');
 const mistralModelId = process.env.MISTRAL_CHAT_MODEL ?? 'mistral-small-latest';
 
 const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks.
@@ -130,12 +134,46 @@ function createAuditedTools(toolDefinitions: Record<string, any>, baseContext: A
  * This handler initializes and calls a tool-calling agent with risk-aware auditing.
  */
 export async function POST(req: NextRequest) {
-  const { id, messages }: { id: string; messages: Array<UIMessage> } = await req.json();
+  try {
+    // Parse request body
+    let id: string;
+    let messages: Array<UIMessage>;
+    
+    try {
+      const body = await req.json();
+      id = body.id;
+      messages = body.messages;
+      
+      if (!id || !Array.isArray(messages)) {
+        return NextResponse.json(
+          { error: 'Invalid request: id and messages are required' },
+          { status: 400 }
+        );
+      }
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
 
-  setAIContext({ threadID: id });
+    setAIContext({ threadID: id });
 
-  const session = await auth0.getSession();
-  const user = session?.user;
+    // Get Auth0 session with error handling
+    let session;
+    let user;
+    
+    try {
+      session = await auth0.getSession();
+      user = session?.user;
+    } catch (authError) {
+      console.error('Auth0 session error:', authError);
+      return NextResponse.json(
+        { error: 'Authentication failed. Please log in again.' },
+        { status: 401 }
+      );
+    }
 
   let workspaceId: string | undefined;
   if (user?.sub && user.email) {
@@ -256,5 +294,48 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  return createUIMessageStreamResponse({ stream });
+    return createUIMessageStreamResponse({ stream });
+  } catch (error) {
+    // Top-level error handler for unexpected failures
+    console.error('❌ Chat API error:', error);
+    console.error('Error details:', {
+      name: (error as any)?.constructor?.name,
+      message: (error as Error)?.message,
+      stack: (error as Error)?.stack,
+    });
+    
+    // Return user-friendly error
+    const errorMessage = (error as Error)?.message || 'An unexpected error occurred';
+    
+    // Check for specific error types
+    if (errorMessage.includes('DATABASE_URL')) {
+      return NextResponse.json(
+        { error: 'Database configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+    
+    if (errorMessage.includes('MISTRAL_API_KEY') || errorMessage.includes('API key')) {
+      return NextResponse.json(
+        { error: 'AI service configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+    
+    if (errorMessage.includes('AUTH0')) {
+      return NextResponse.json(
+        { error: 'Authentication service error. Please try logging in again.' },
+        { status: 500 }
+      );
+    }
+    
+    // Generic error response
+    return NextResponse.json(
+      { 
+        error: 'Failed to process chat request',
+        message: process.env.NODE_ENV === 'development' ? errorMessage : 'An error occurred. Please try again.'
+      },
+      { status: 500 }
+    );
+  }
 }

@@ -133,7 +133,7 @@ function StickyToBottomContent(props: {
     <div
       ref={context.scrollRef}
       style={{ width: '100%', height: '100%' }}
-      className={cn('grid grid-rows-[1fr,auto]', props.className)}
+      className={cn('grid grid-rows-[1fr,auto] scrollbar-gutter-stable', props.className)}
     >
       <div ref={context.contentRef} className={props.contentClassName}>
         {props.content}
@@ -350,7 +350,7 @@ export function ChatWindow(props: {
       <StickToBottom>
         <StickyToBottomContent
           className="absolute inset-0"
-          contentClassName="py-8 px-2"
+          contentClassName="py-8 px-4 pr-6"
           content={
           messages.length === 0 ? (
             <div>{props.emptyStateComponent}</div>
@@ -375,12 +375,12 @@ export function ChatWindow(props: {
           )
         }
         footer={
-          <div className="sticky bottom-8 px-2">
+          <div className="sticky bottom-8 px-4">
             <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
-                className="absolute bottom-full right-2 mb-4 border-2 border-console bg-pale hover:bg-red-100 px-3 py-1.5 font-ibm-plex-mono text-xs text-console hover:text-red-600 transition-colors flex items-center gap-1"
+                className="absolute bottom-full right-4 mb-4 border-2 border-console bg-pale hover:bg-red-100 px-3 py-1.5 font-ibm-plex-mono text-xs text-console hover:text-red-600 transition-colors flex items-center gap-1"
               >
                 <Trash2 className="w-3 h-3" />
                 Clear Chat
