@@ -34,10 +34,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="twitter:description" content={DESCRIPTION} />
         <meta name="twitter:image" content="/images/og-image.png" />
       </head>
-      <body className={`${ibmPlexMono.variable} ${spaceMono.variable} ${ibmPlexMono.className}`}>
+      <body className={`${ibmPlexMono.variable} ${spaceMono.variable} ${ibmPlexMono.className} overflow-hidden`}>
         <NuqsAdapter>
-          <div className="bg-mint grid grid-rows-[auto,1fr] h-[100dvh]">
-            <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-console/90 backdrop-blur-xl border-b-2 border-console sticky top-0 z-50">
+          <div className="bg-mint flex flex-col h-[100dvh]">
+            <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-console/90 backdrop-blur-xl border-b-2 border-console z-50 flex-shrink-0">
               <div className="flex gap-4 flex-col md:flex-row md:items-center">
                 <a
                   href="https://assistant0agent.vercel.app/"
@@ -69,32 +69,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </Button>
               </div>
             </div>
-            <div className="relative grid overflow-auto">
-              <div className="absolute inset-0">{children}</div>
+            <div className="flex-1 overflow-hidden">
+              {children}
             </div>
           </div>
-          
-          {/* Footer */}
-          <footer className="border-t-2 border-console bg-pale py-6 px-4">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="font-ibm-plex-mono text-xs text-console/70">
-                © 2025 Assistant0. Built with Auth0 for AI Agents Challenge.
-              </p>
-              <div className="flex gap-4 font-ibm-plex-mono text-xs">
-                <a href="/privacy" className="text-console hover:text-console/70 transition-colors">
-                  Privacy Policy
-                </a>
-                <span className="text-console/30">|</span>
-                <a href="/terms" className="text-console hover:text-console/70 transition-colors">
-                  Terms of Service
-                </a>
-                <span className="text-console/30">|</span>
-                <a href="https://github.com/bO-05/assistantzero" target="_blank" rel="noopener noreferrer" className="text-console hover:text-console/70 transition-colors">
-                  GitHub
-                </a>
-              </div>
-            </div>
-          </footer>
 
           <Toaster richColors />
           <Analytics />

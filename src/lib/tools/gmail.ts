@@ -2,14 +2,21 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { GmailCreateDraft, GmailSearch, GmailSendMessage } from '@langchain/community/tools/gmail';
 
-import { getAccessToken, withGoogleConnection } from '../auth0-ai';
+import { withGoogleConnection } from '../auth0-ai';
+import { getAccessTokenFromTokenVault } from '@auth0/ai-vercel';
 
 // Provide the access token to the Gmail tools
 // LangChain tools expect accessToken to be string | () => Promise<string>
-// Wrap the sync getAccessToken in an async function for LangChain compatibility
+// getAccessTokenFromTokenVault() is called by the withGoogleConnection wrapper's context
 const gmailParams = {
   credentials: {
-    accessToken: async () => getAccessToken(),
+    accessToken: async () => {
+      const token = getAccessTokenFromTokenVault();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+      return token;
+    },
   },
 };
 

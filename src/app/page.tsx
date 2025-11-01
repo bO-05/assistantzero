@@ -24,14 +24,14 @@ export default async function Home() {
     );
 
     return (
-      <div className="flex h-screen">
+      <div className="flex h-full">
         {/* ChatGPT-style sidebar */}
         <Suspense fallback={<div className="w-64 border-r-2 border-console bg-pale" />}>
-          <ChatSidebar className="w-64 hidden md:block" />
+          <ChatSidebar className="w-64 hidden md:block flex-shrink-0" />
         </Suspense>
 
         {/* Main chat area */}
-        <div className="flex-1 relative">
+        <div className="flex-1 overflow-hidden">
           <Suspense fallback={<div>Loading...</div>}>
             <ChatWindow
               endpoint="api/chat"

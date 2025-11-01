@@ -3,7 +3,8 @@ import { endOfDay, formatISO, startOfDay } from 'date-fns';
 import { google } from 'googleapis';
 import { z } from 'zod';
 
-import { getAccessToken, withGoogleConnection } from '../auth0-ai';
+import { withGoogleConnection } from '../auth0-ai';
+import { getAccessTokenFromTokenVault } from '@auth0/ai-vercel';
 
 export const getCalendarEventsTool = withGoogleConnection(
   tool({
@@ -12,8 +13,12 @@ export const getCalendarEventsTool = withGoogleConnection(
       date: z.coerce.date().describe('The date to check for events'),
     }),
     execute: async ({ date }) => {
-      // Get the access token from Auth0 AI (synchronously from context)
-      const accessToken = getAccessToken();
+      // Get the access token from Auth0 AI (from context injected by withGoogleConnection)
+      const accessToken = getAccessTokenFromTokenVault();
+      
+      if (!accessToken) {
+        throw new Error('No access token available');
+      }
 
       // Google SDK
       try {
@@ -77,8 +82,12 @@ export const createCalendarEventTool = withGoogleConnection(
       attendees: z.array(z.string()).optional().describe('Optional array of attendee email addresses. Invitations will be sent.'),
     }),
     execute: async ({ summary, description, startTime, endTime, location, attendees }) => {
-      // Get the access token from Auth0 AI (synchronously from context)
-      const accessToken = getAccessToken();
+      // Get the access token from Auth0 AI (from context injected by withGoogleConnection)
+      const accessToken = getAccessTokenFromTokenVault();
+      
+      if (!accessToken) {
+        throw new Error('No access token available');
+      }
 
       // Google SDK
       try {
