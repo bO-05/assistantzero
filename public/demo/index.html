@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="A disconnected Assistant0 preview with fictional documents and preset responses. No account, model, Gmail, or database connection.">
+  <title>Assistant0 / Offline field notes</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./demo.css">
+  <script type="module" src="./demo.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to the preview</a>
+  <div class="shell">
+    <header class="masthead">
+      <a class="wordmark" href="./index.html" aria-label="Assistant0 offline preview">assistant<span>0</span><small>FIELD NOTES / 01</small></a>
+      <div class="header-actions"><span class="offline">OFFLINE FIXTURES</span><a href="/" class="app-link">Signed-in app <span aria-hidden="true">↗</span></a></div>
+    </header>
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">A DISCONNECTED PRODUCT PREVIEW</p>
+      <h1 id="hero-title">The right context.<br><span>Not every document.</span></h1>
+      <div class="hero-bottom"><p>Explore document access and grounded answers without connecting an account. Fictional documents. Preset text. Nothing sent.</p><p class="notation">03 sample documents<br>00 connected services</p></div>
+    </section>
+    <aside class="disclosure"><strong>This is not a live AI session.</strong> Persona switches and permissions are illustrative. All fixture text is public in the source. This page does not test hosted Auth0 or OpenFGA settings.</aside>
+    <main id="workspace" tabindex="-1">
+      <div class="workspace-heading"><div><p class="eyebrow">THE SANDBOX</p><h2>Your context, in view.</h2></div><p class="small-label">LOCAL INTERACTIONS ONLY</p></div>
+      <div class="persona-bar"><span class="small-label" id="persona-label">FICTIONAL PERSONA</span><div class="button-group" aria-labelledby="persona-label"><button type="button" data-persona="owner" aria-pressed="true">Owner fixture</button><button type="button" data-persona="viewer" aria-pressed="false">Viewer fixture</button><button type="button" data-persona="unrelated" aria-pressed="false">Unrelated fixture</button></div></div>
+      <nav class="view-nav" aria-label="Preview views"><button type="button" data-view="documents" aria-pressed="true">01 / Documents</button><button type="button" data-view="answers" aria-pressed="false">02 / Ask a fixture</button><button type="button" data-view="permissions" aria-pressed="false">03 / Permissions</button></nav>
+      <section id="documents-panel" class="panel" aria-label="Fictional document workspace">
+        <div class="document-list"><label for="filter">Filter sample documents</label><input id="filter" type="search" placeholder="Try “handoff”" autocomplete="off"><p id="document-count" class="small-label" aria-live="polite"></p><ul id="documents"></ul></div>
+        <article class="document-detail"><p class="eyebrow">FIXTURE INSPECTOR</p><h3 id="detail-title"></h3><p id="detail-access" class="access-label"></p><p id="detail-body"></p><button id="share-preview" type="button" class="accent-button">Preview a share action</button><p id="share-status" class="muted" aria-live="polite"></p></article>
+      </section>
+      <section id="answers-panel" class="panel answers-panel" aria-label="Preset fixture answers" hidden>
+        <div><p class="eyebrow">PICK A PRESET QUESTION</p><h3>No prompt leaves this page.</h3><div class="question-list"><button type="button" data-question="handoff">What is in the handoff?</button><button type="button" data-question="workshop">What do the workshop notes say?</button><button type="button" data-question="checklist">What is on the checklist?</button></div></div>
+        <article class="answer"><p class="small-label">PRESET RESPONSE / NOT MODEL OUTPUT</p><p id="answer-text" aria-live="polite">Choose a question to inspect a local example.</p><p id="answer-source" class="citation"></p></article>
+      </section>
+      <section id="permissions-panel" class="permissions-panel" aria-label="Illustrative permission matrix" hidden><p>Example per-document decisions for the selected fictional persona. Workspace membership alone is not a grant.</p><div class="table-wrap"><table><caption>Simulated access, not a hosted authorization test</caption><thead><tr><th scope="col">Fictional document</th><th scope="col">Read</th><th scope="col">Share / delete</th></tr></thead><tbody id="permission-rows"></tbody></table></div></section>
+      <div class="boundary"><p><strong>Where the preview stops</strong><br>No uploads, model requests, Gmail actions, or database access. This preview does not read or write cookies or browser storage. Filters and persona choices reset on reload.</p><p>For the real app, sign-in and configured services are required. API acceptance of an email is not proof of recipient delivery.</p></div>
+    </main>
+    <footer><span>Assistant0 / A permission-aware assistant prototype</span><a href="https://github.com/bO-05/assistantzero" target="_blank" rel="noopener noreferrer">Source &amp; template credits ↗</a></footer>
+  </div>
+</body>
+</html>

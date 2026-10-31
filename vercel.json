@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npx --yes --package=npm@11.21.1 npm ci --ignore-scripts --strict-peer-deps"
+}

@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { requireEnv } from '@/lib/env-validation';
 
@@ -10,10 +10,10 @@ const DATABASE_URL = requireEnv(
 
 const dbClientPropertyName = `__prevent-name-collision__db`;
 type GlobalThisWithDbClient = typeof globalThis & {
-  [dbClientPropertyName]: any;
+  [dbClientPropertyName]?: PostgresJsDatabase;
 };
 
-const getDbClient = () => {
+const getDbClient = (): PostgresJsDatabase => {
   try {
     if (process.env.NODE_ENV === 'production') {
       const client = postgres(DATABASE_URL, {
@@ -33,14 +33,10 @@ const getDbClient = () => {
         });
         newGlobalThis[dbClientPropertyName] = drizzle(client);
       }
-      return newGlobalThis[dbClientPropertyName];
+      return newGlobalThis[dbClientPropertyName]!;
     }
-  } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    throw new Error(
-      `Failed to connect to database. Please check your DATABASE_URL is correct and the database is accessible.\n` +
-      `Error: ${(error as Error).message}`
-    );
+  } catch {
+    throw new Error('Database client initialization failed. Check the configured connection.');
   }
 };
 

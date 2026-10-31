@@ -4,6 +4,7 @@ import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { nanoid } from '@/utils/nano-id';
+import type { DatabaseJson } from './json';
 
 export const auditLogs = pgTable('audit_logs', {
   id: varchar('id', { length: 191 })
@@ -13,8 +14,8 @@ export const auditLogs = pgTable('audit_logs', {
   toolName: varchar('tool_name', { length: 100 }),
   agentRole: varchar('agent_role', { length: 100 }),
   status: varchar('status', { length: 50 }).notNull(),
-  inputs: jsonb('inputs'),
-  outputs: jsonb('outputs'),
+  inputs: jsonb('inputs').$type<DatabaseJson>(),
+  outputs: jsonb('outputs').$type<DatabaseJson>(),
   errorMessage: text('error_message'),
   workspaceId: varchar('workspace_id', { length: 191 }),
   threadId: varchar('thread_id', { length: 191 }),

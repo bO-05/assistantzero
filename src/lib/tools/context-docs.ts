@@ -4,6 +4,7 @@ import { FGAFilter } from '@auth0/ai';
 
 import { findRelevantContent } from '@/lib/rag/embedding';
 import { auth0 } from '../auth0';
+import { requireDocumentActor } from '@/lib/document-access';
 
 export type DocumentWithScore = {
   content: string;
@@ -24,10 +25,11 @@ export const getContextDocumentsTool = tool({
     if (!user) {
       return 'There is no user logged in.';
     }
+    const actor = requireDocumentActor(user);
 
     const retriever = FGAFilter.create({
       buildQuery: (doc: DocumentWithScore) => ({
-        user: `user:${user?.email}`,
+        user: `user:${actor.email}`,
         object: `doc:${doc.documentId}`,
         relation: 'can_view',
       }),

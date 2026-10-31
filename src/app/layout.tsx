@@ -15,7 +15,7 @@ const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], varia
 const ibmPlexMono = IBM_Plex_Mono({ weight: ['400', '500', '600', '700'], subsets: ['latin'], variable: '--font-ibm-plex-mono' });
 
 const TITLE = 'Assistant0';
-const DESCRIPTION = 'A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0.';
+const DESCRIPTION = 'An Auth0-based assistant prototype with document-access checks, configured tool integrations, and a disconnected fictional-data preview.';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth0.getSession();
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" suppressHydrationWarning>
       <head>
         <title>{TITLE}</title>
-        <link rel="shortcut icon" type="image/svg+xml" href="/images/favicon.png" />
+        <link rel="shortcut icon" type="image/png" href="/images/favicon.png" />
         <meta name="description" content={DESCRIPTION} />
         <meta property="og:title" content={TITLE} />
         <meta property="og:description" content={DESCRIPTION} />

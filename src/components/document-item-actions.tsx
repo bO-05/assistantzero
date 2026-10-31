@@ -19,10 +19,11 @@ import { deleteDocument, getDocumentContent, shareDocument } from '@/lib/actions
 
 interface DocumentItemActionsProps {
   doc: Omit<DocumentParams, 'content'>;
+  canManage: boolean;
   onActionComplete: () => void; // To trigger revalidation on the parent page
 }
 
-export default function DocumentItemActions({ doc, onActionComplete }: DocumentItemActionsProps) {
+export default function DocumentItemActions({ doc, canManage, onActionComplete }: DocumentItemActionsProps) {
   const [emailToShare, setEmailToShare] = useState('');
   const [openShareDialog, setOpenShareDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,7 +35,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
       if (!content) {
         throw new Error('Failed to download document');
       }
-      const blob = new Blob([content as any], { type: doc.fileType });
+      const blob = new Blob([new Uint8Array(content)], { type: doc.fileType });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -45,8 +46,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
       document.body.removeChild(a);
 
       toast.success(`Downloaded ${doc.fileName} successfully`);
-    } catch (error) {
-      console.error('Error downloading document:', error);
+    } catch {
       toast.error('Failed to download document');
     }
   };
@@ -62,8 +62,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
       toast.success(`${doc.fileName} shared with ${emailToShare}.`);
       onActionComplete(); // Trigger revalidation
       setEmailToShare(''); // Reset email input
-    } catch (error) {
-      console.error('Error sharing document:', error);
+    } catch {
       toast.error('Failed to share document.');
     }
     setIsProcessing(false);
@@ -73,11 +72,14 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
   const handleDeleteConfirm = async () => {
     setIsProcessing(true);
     try {
-      await deleteDocument(doc.id);
-      toast.success(`${doc.fileName} deleted successfully.`);
+      const result = await deleteDocument(doc.id);
+      if (result.accessCleanupComplete) {
+        toast.success(`${doc.fileName} deleted successfully.`);
+      } else {
+        toast.warning('Document deleted. Remote permission cleanup could not be confirmed.');
+      }
       onActionComplete(); // Trigger revalidation
-    } catch (error) {
-      console.error('Error deleting document:', error);
+    } catch {
       toast.error('Failed to delete document.');
     }
     setIsProcessing(false);
@@ -89,6 +91,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
         Download
       </Button>
 
+      {canManage ? <>
       <Dialog
         open={openShareDialog}
         onOpenChange={(open) => {
@@ -164,6 +167,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </> : null}
     </div>
   );
 }

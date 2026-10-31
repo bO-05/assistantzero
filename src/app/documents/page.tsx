@@ -69,6 +69,7 @@ export default async function DocumentsPage() {
                 </div>
                 <DocumentItemActions
                   doc={doc}
+                  canManage={doc.userId === user.sub}
                   onActionComplete={handleDocumentActionComplete}
                 />
               </div>

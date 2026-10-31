@@ -21,9 +21,7 @@ export const getAccessToken = () => {
       
       throw new TokenVaultInterrupt(
         'You need to connect your Google account to access Gmail and Calendar features.',
-        'google-oauth2',
-        scopes,
-        scopes
+        { connection: 'google-oauth2', scopes, requiredScopes: scopes }
       );
     }
     
@@ -44,9 +42,7 @@ export const getAccessToken = () => {
     
     throw new TokenVaultInterrupt(
       'Authorization required to access your Google account.',
-      'google-oauth2',
-      scopes,
-      scopes
+      { connection: 'google-oauth2', scopes, requiredScopes: scopes }
     );
   }
 };

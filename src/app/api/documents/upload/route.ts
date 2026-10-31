@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pdf from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 
 import { createDocument } from '@/lib/actions/documents';
+import { auth0 } from '@/lib/auth0';
+import { DocumentAuthenticationError, requireDocumentActor } from '@/lib/document-access';
 
 const ALLOWED_FILE_TYPES = ['text/plain', 'application/pdf', 'text/markdown'];
 const MAX_FILE_SIZE_MB = 10;
@@ -9,10 +11,18 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
+    requireDocumentActor((await auth0.getSession())?.user);
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof DocumentAuthenticationError ? 'Authentication required.' : 'Unable to authenticate upload.' },
+      { status: error instanceof DocumentAuthenticationError ? 401 : 500 },
+    );
+  }
+  try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
     }
 
@@ -62,10 +72,8 @@ export async function POST(request: NextRequest) {
     } else {
       return NextResponse.json({ message: 'Failed to process upload.', error: result }, { status: 500 });
     }
-  } catch (error: any) {
-    console.error('Upload error:', error);
-    const errorMessage = error.message || 'An unexpected error occurred.';
-    return NextResponse.json({ message: 'Failed to process upload.', error: errorMessage }, { status: 500 });
+  } catch {
+    return NextResponse.json({ message: 'Failed to process upload.' }, { status: 500 });
   }
 }
 
@@ -73,8 +81,13 @@ const extractFileContent = async (file: File): Promise<[string | null, Buffer | 
   const fileBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(fileBuffer);
   if (file.type === 'application/pdf') {
-    const data = await pdf(buffer);
-    return [data.text, buffer];
+    const parser = new PDFParse({ data: buffer, isEvalSupported: false, disableAutoFetch: true });
+    try {
+      const data = await parser.getText();
+      return [data.text, buffer];
+    } finally {
+      await parser.destroy();
+    }
   } else if (file.type === 'text/plain' || file.type === 'text/markdown') {
     return [buffer.toString('utf-8'), buffer];
   }

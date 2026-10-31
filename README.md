@@ -1,32 +1,32 @@
-# Assistant0 - Secure AI Personal Assistant
+# Assistant0 - Auth0 Assistant Prototype
 
-A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0. Built for the Auth0 hackathon challenge.
+An Auth0 hackathon prototype for document retrieval, an audit dashboard, and connected assistant tools. Signed-in features require configured services. This is not a security certification, compliance product, or availability promise.
 
-🚀 **[Live Demo](https://assistant0agent.vercel.app)** | 📦 **[GitHub Repo](https://github.com/bO-05/assistantzero)**
+**[Fixture-only guest preview](https://assistant0agent.vercel.app/demo/index.html)** | **[Configured app](https://assistant0agent.vercel.app)** | **[Source](https://github.com/bO-05/assistantzero)**
 
 > Built with Auth0 AI SDK, Next.js 15, Mistral AI, and Fine-Grained Authorization (FGA)
 
 ## ✨ What It Does
 
-**Mission Control Dashboard** - Track every AI action with full audit trails, risk scoring, and Auth0 context for compliance.
+**Mission Control Dashboard** - Inspect application audit records and prototype risk classifications. Logging can fail; this is not proof of a complete audit trail or compliance.
 
-**Risk-Adaptive Auth** - Automatically trigger step-up authentication for sensitive operations based on risk assessment.
+**Risk-Adaptive Auth** - Prototype risk rules block flagged tools. A chat reply does not prove Auth0 step-up approval. Hosted step-up and provider behavior were not verified in the offline source checks.
 
-**Workspace Isolation** - Separate work, personal, and family contexts using Auth0 FGA to prevent data leakage.
+**Workspaces** - Organize documents and application context. Workspace membership alone does not grant document access.
 
 **Smart Document RAG** - Upload documents and chat with them using AI-powered semantic search with pgvector.
 
-**Tool Integrations** - Search the web, manage emails, check calendars, and more - all secured by Auth0.
+**Tool Integrations** - Configured Exa search, Gmail draft/search, calendar tools, and a commerce prototype. Real chat requires a session; it is separate from the disconnected guest preview.
 
 ## 🛠️ Tech Stack
 
 **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS, shadcn/ui
 
-**AI & Backend:** Vercel AI SDK v5, Mistral AI, Auth0 AI SDK v4, Auth0 Next.js SDK v4
+**AI & Backend:** Vercel AI SDK v5, Mistral AI, Auth0 AI core v6 / Vercel adapter v5, Auth0 Next.js SDK v4
 
-**Security:** Auth0 FGA (Fine-Grained Authorization), Token Vault, CIBA, Step-up Auth
+**Access integration:** Auth0 FGA, Token Vault, and prototype CIBA / step-up flows
 
-**Database:** PostgreSQL (Neon) with Drizzle ORM + pgvector for semantic search
+**Database:** PostgreSQL via `DATABASE_URL`, Drizzle ORM, and pgvector. A specific hosted database and its live constraints were not independently verified in this source pass.
 
 **Deployment:** Vercel
 
@@ -36,9 +36,9 @@ A smart AI assistant that helps you manage your digital life with enterprise-gra
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/
-│   │   ├── chat/          # Streaming chat API endpoint
+│   │   ├── chat/          # Session boundary + lazily loaded streaming handler
 │   │   ├── documents/     # Document upload API
-│   │   └── migrate/       # Database migration endpoint
+│   │   └── migrate/       # Retired HTTP diagnostic (410), no database access
 │   ├── page.tsx           # Main chat interface + landing page
 │   ├── documents/         # Document management page
 │   ├── mission-control/   # Audit trail dashboard
@@ -72,14 +72,26 @@ src/
 ```
 
 **How it works:**
-1. User authenticates via Auth0 → managed by `src/middleware.ts`
+1. Auth0 handles sign-in; private chat and document boundaries explicitly validate the session. Middleware alone is not an authorization guarantee.
 2. Chat with AI at `/` → streams from `src/app/api/chat/route.ts` with tool interrupts
 3. Upload docs at `/documents` → stored in PostgreSQL with pgvector embeddings
-4. Monitor actions at `/mission-control` → full audit trail with risk scoring
-5. Manage contexts at `/workspaces` → Auth0 FGA enforces isolation
+4. Inspect application records at `/mission-control` when logging and its database are configured
+5. Manage contexts at `/workspaces`; document access remains explicitly per-document
 6. AI tools auto-prompt for Google OAuth via Token Vault when needed
 
 ## 🚀 Quick Start
+
+### Guest preview and review boundaries
+
+`/demo/index.html` uses fictional public fixtures and preset responses. It makes no model, Gmail, database, or other service calls and does not read or write browser storage or cookies. It is not a hosted authorization test. Only its three exact asset paths bypass Auth0 middleware, with a CSP that forbids network connections and form submission. The legacy `NEXT_PUBLIC_DEMO` flag no longer opens model-backed guest chat.
+
+Source checks cover document ownership, explicit verified-email sharing, foreign-workspace refusal, SQL-filtered retrieval before FGA, and anonymous upload/chat refusal. The 70 regression tests use embedded PGlite PostgreSQL fixtures and mocked providers. Constant fixture distance tests access predicates, not embedding quality. Share/delete controls are owner-only in the UI; server predicates remain the enforcement boundary.
+
+SQL and OpenFGA are not one transaction. Failed creation can leave remote tuples without a committed document; SQL access checks prevent reading such a document. Deletion revokes SQL access first and reports incomplete remote cleanup. OpenFGA idempotency options require a compatible configured service. No live tuple cleanup, model run, database migration, seed, provider write, or hosted sign-in proof is implied.
+
+The reviewed dependency audit reports **0 critical, 2 high, and 23 moderate findings**. The two high entries are one underlying advisory, [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), affecting Auth0 AI's required Zod 3 dependency. Root Zod is patched, but that does not patch the SDK's nested copy. Authenticated chat has byte, collection, and depth limits before SDK validation. The dependency advisory remains unresolved; do not treat these limits as an upstream fix or this prototype as production-certified. No incompatible Zod override is forced.
+
+The production-only dependency audit reports **0 critical, 2 high, and 5 moderate findings**. The production build passes with upstream AI/Auth0 dynamic-import and Edge compression API warnings. This is not proof of hosted Auth0 sign-in, DPoP, compressed-session, or provider compatibility. A synthetic one-page PDF exercises the installed parser API without uploading a document.
 
 ### 1. Clone the Repository
 ```bash
@@ -87,7 +99,20 @@ git clone https://github.com/bO-05/assistantzero.git
 cd assistant0
 ```
 
-### 2. Set Up Environment Variables
+### 2. Install the reviewed lock
+
+Use Node **22.9 or newer** and the pinned npm release. Older npm 10.5.1 crashed resolving this dependency graph.
+
+```sh
+npm exec --yes --package=npm@11.21.1 -- npm ci --ignore-scripts --strict-peer-deps
+npm test
+npm run typecheck
+npm run lint
+```
+
+Gmail uses the existing Google API client rather than the broad LangChain community dependency. Exa uses a bounded HTTPS search adapter. Their tests mock all provider traffic; no email delivery or live search result is claimed.
+
+### 3. Set Up Environment Variables
 Copy `.env.example` to `.env.local` and configure:
 
 **Required:**
@@ -110,12 +135,13 @@ Copy `.env.example` to `.env.local` and configure:
 - [Call Your APIs on Users' Behalf](https://auth0.com/ai/docs/call-your-apis-on-users-behalf) (required for async auth)
 - [Asynchronous Authorization](https://auth0.com/ai/docs/async-authorization) (optional)
 
-### 3. Set Up Database
+### 4. Set Up Database (owner-approved target only)
+These are manual setup instructions, not actions performed by the source checks. Confirm ownership and target, review migration SQL, and back up existing data before any database change. Do not run migration or FGA initialization commands during guest-preview QA.
+
 **Option A: Neon (Recommended for Production)**
-1. Create a free account at [Neon](https://neon.tech)
-2. Create a new project and enable pgvector extension
-3. Copy the connection string to `DATABASE_URL` in `.env.local`
-4. Run migrations: `npm run db:migrate`
+1. Use an existing owner-approved PostgreSQL database with pgvector.
+2. Configure its connection string as `DATABASE_URL`.
+3. Only after explicit target approval, apply reviewed migrations with `npm run db:migrate`.
 
 **Option B: Local PostgreSQL**
 1. Install PostgreSQL locally with pgvector extension
@@ -123,15 +149,14 @@ Copy `.env.example` to `.env.local` and configure:
 3. Set `DATABASE_URL` in `.env.local`
 4. Run migrations: `npm run db:migrate`
 
-### 4. Initialize Auth0 FGA
+### 5. Initialize Auth0 FGA (owner-approved store only)
 ```bash
-npm install
 npm run fga:init            # Initialize FGA authorization model
 ```
 
 After running `fga:init`, copy the generated `FGA_MODEL_ID` from console output and add it to `.env.local`.
 
-### 5. Run Development Server
+### 6. Run Development Server
 ```bash
 npm run dev
 ```
@@ -147,6 +172,8 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server (runs build first)
 npm run lint         # Run ESLint
+npm test             # Offline regressions, mocked providers
+npm run typecheck    # TypeScript checks
 npm run db:migrate   # Run database migrations
 npm run db:studio    # Open Drizzle Studio (DB GUI)
 npm run fga:init     # Initialize FGA authorization model
@@ -161,7 +188,7 @@ This is a hackathon submission project. Feel free to fork and adapt for your own
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for the original Auth0 copyright and terms. Dependencies and service integrations retain their own licenses and terms.
 
 ## 🙏 Acknowledgments
 

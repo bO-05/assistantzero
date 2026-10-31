@@ -4,6 +4,7 @@ import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 import { nanoid } from '@/utils/nano-id';
+import type { DatabaseJson } from './json';
 
 export const playbooks = pgTable('playbooks', {
   id: varchar('id', { length: 191 })
@@ -19,7 +20,7 @@ export const playbooks = pgTable('playbooks', {
   lastRunAt: timestamp('last_run_at'),
   nextRunAt: timestamp('next_run_at'),
   runCount: integer('run_count').default(0),
-  metadata: jsonb('metadata'),
+  metadata: jsonb('metadata').$type<DatabaseJson>(),
   createdAt: timestamp('created_at')
     .notNull()
     .default(sql`now()`),

@@ -1,10 +1,13 @@
 import { embed, embedMany } from 'ai';
 import { mistral } from '@ai-sdk/mistral';
-import { desc, gt, sql, cosineDistance } from 'drizzle-orm';
+import { and, desc, eq, gt, sql, cosineDistance } from 'drizzle-orm';
 import { chunk } from 'llm-chunk';
 
 import { db } from '@/lib/db';
 import { embeddings } from '@/lib/db/schema/embeddings';
+import { documents } from '@/lib/db/schema/documents';
+import { auth0 } from '@/lib/auth0';
+import { documentReadScope, requireDocumentActor } from '@/lib/document-access';
 
 const embeddingModel = mistral.textEmbedding(process.env.MISTRAL_EMBEDDING_MODEL ?? 'mistral-embed');
 
@@ -27,13 +30,15 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
 };
 
 export const findRelevantContent = async (userQuery: string, limit = 4) => {
+  const actor = requireDocumentActor((await auth0.getSession())?.user);
   const userQueryEmbedded = await generateEmbedding(userQuery);
   const similarity = sql<number>`1 - (${cosineDistance(embeddings.embedding, userQueryEmbedded)})`;
   const similarGuides = await db
-    .select({ content: embeddings.content, similarity, documentId: embeddings.documentId })
+    .select({ content: embeddings.content, similarity, documentId: documents.id })
     .from(embeddings)
-    .where(gt(similarity, 0.5))
-    .orderBy((t: any) => desc(t.similarity))
+    .innerJoin(documents, eq(embeddings.documentId, documents.id))
+    .where(and(gt(similarity, 0.5), documentReadScope(actor)))
+    .orderBy(desc(similarity))
     .limit(limit);
   return similarGuides;
 };

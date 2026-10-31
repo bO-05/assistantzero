@@ -57,12 +57,12 @@ export default async function Home() {
               {/* Version Badge */}
               <div className="inline-block mb-6 border-2 border-[#0a0a0a] px-3 py-1 bg-[#e8f4ed]">
                 <span className="font-space-mono text-xs font-bold tracking-wider text-[#0a0a0a]">
-                  VERSION 1.0.0
+                  ASSISTANT PROTOTYPE
                 </span>
               </div>
 
               {/* Hero Title */}
-              <h1 className="font-space-mono font-bold text-6xl lg:text-7xl leading-none tracking-tight text-[#0a0a0a] mb-8">
+              <h1 className="font-space-mono font-bold text-4xl sm:text-6xl lg:text-7xl leading-none tracking-tight text-[#0a0a0a] mb-8">
                 AI ASSISTANT
                 <br />
                 <span className="relative inline-block">
@@ -73,7 +73,7 @@ export default async function Home() {
 
               {/* Hero Description */}
               <p className="text-lg font-ibm-plex-mono text-[#0a0a0a]/80 leading-relaxed max-w-md mb-8">
-                A smart AI assistant that helps you manage your digital life with enterprise-grade security powered by Auth0.
+                An Auth0-based assistant prototype with document retrieval, an audit dashboard, and optional connected tools.
               </p>
 
               {/* CTA Buttons */}
@@ -95,11 +95,15 @@ export default async function Home() {
                 </a>
               </div>
 
+              <a href="/demo/index.html" className="inline-block mb-6 font-ibm-plex-mono text-sm underline underline-offset-4 text-[#0a0a0a]">
+                EXPLORE THE FIXTURE-ONLY GUEST PREVIEW
+              </a>
+
               {/* Status Indicator */}
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-[#ff5722] animate-pulse"></div>
                 <span className="font-ibm-plex-mono text-xs tracking-wider text-[#0a0a0a]/70">
-                  SYSTEM OPERATIONAL
+                  SIGNED-IN FEATURES REQUIRE CONFIGURED SERVICES
                 </span>
               </div>
             </div>
@@ -120,7 +124,7 @@ export default async function Home() {
                     </div>
                     <div className="flex items-center gap-3 font-ibm-plex-mono text-sm">
                       <div className="w-2 h-2 bg-[#0a0a0a]"></div>
-                      <span className="text-[#0a0a0a]">STATUS: FIELD TESTED</span>
+                      <span className="text-[#0a0a0a]">STATUS: HACKATHON PROTOTYPE</span>
                     </div>
                     <div className="flex items-center gap-3 font-ibm-plex-mono text-sm">
                       <div className="w-2 h-2 bg-[#0a0a0a]"></div>
@@ -134,12 +138,12 @@ export default async function Home() {
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <div className="text-3xl font-ibm-plex-mono font-bold text-[#0a0a0a]">24/7</div>
-                      <div className="text-xs font-ibm-plex-mono text-[#0a0a0a]/70 tracking-wider">AVAILABILITY</div>
+                      <div className="text-3xl font-ibm-plex-mono font-bold text-[#0a0a0a]">Auth0</div>
+                      <div className="text-xs font-ibm-plex-mono text-[#0a0a0a]/70 tracking-wider">IDENTITY PROVIDER</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-3xl font-ibm-plex-mono font-bold text-[#0a0a0a]">&lt;1s</div>
-                      <div className="text-xs font-ibm-plex-mono text-[#0a0a0a]/70 tracking-wider">RESPONSE TIME</div>
+                      <div className="text-3xl font-ibm-plex-mono font-bold text-[#0a0a0a]">Presets</div>
+                      <div className="text-xs font-ibm-plex-mono text-[#0a0a0a]/70 tracking-wider">GUEST PREVIEW</div>
                     </div>
                   </div>
                 </div>
@@ -156,10 +160,10 @@ export default async function Home() {
             <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
               <Zap className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
               <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
-                HIGH PERFORMANCE
+                TOOL CALLING
               </h3>
               <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
-                Optimized response times and processing
+                Model-assisted tool routing when the required services are configured
               </p>
             </div>            
 
@@ -167,10 +171,10 @@ export default async function Home() {
             <div className="border-2 border-[#0a0a0a] bg-[#e8f4ed] p-6 hover:bg-[#d4e8dc] transition-colors">
               <Lock className="w-8 h-8 mb-4 text-[#0a0a0a]" aria-hidden="true" />
               <h3 className="font-ibm-plex-mono font-bold text-lg mb-2 text-[#0a0a0a]">
-                SECURE
+                ACCESS CHECKS
               </h3>
               <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
-                Enterprise-grade security and encryption
+                Auth0 identity and per-document access checks, requiring configured services
               </p>
             </div>
 
@@ -181,7 +185,7 @@ export default async function Home() {
                 AI POWERED
               </h3>
               <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/70 leading-relaxed">
-                Mistral language models and reasoning
+                Mistral-backed chat and embeddings with a configured API key
               </p>
             </div>
 
@@ -210,7 +214,7 @@ export default async function Home() {
           {/* Footer Metadata */}
           <div className="mt-12 text-center">
             <p className="font-ibm-plex-mono text-xs text-[#0a0a0a]/50 tracking-wider">
-              DOCUMENT TYPE: SYSTEM SPECIFICATION / AUTH0 v1.0.0 / FIELD MANUAL
+              PROJECT NOTES / AUTH0 TEMPLATE / INTERACTIVE PROTOTYPE
             </p>
           </div>
         </div>
