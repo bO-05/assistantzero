@@ -85,7 +85,9 @@ src/
 
 `/demo/index.html` uses fictional public fixtures and preset responses. It makes no model, Gmail, database, or other service calls and does not read or write browser storage or cookies. It is not a hosted authorization test. Only its three exact asset paths bypass Auth0 middleware, with a CSP that forbids network connections and form submission. The legacy `NEXT_PUBLIC_DEMO` flag no longer opens model-backed guest chat.
 
-Source checks cover document ownership, explicit verified-email sharing, foreign-workspace refusal, SQL-filtered retrieval before FGA, and anonymous upload/chat refusal. The 70 regression tests use embedded PGlite PostgreSQL fixtures and mocked providers. Constant fixture distance tests access predicates, not embedding quality. Share/delete controls are owner-only in the UI; server predicates remain the enforcement boundary.
+Source checks cover document ownership, explicit verified-email sharing, foreign-workspace refusal, SQL-filtered retrieval before FGA, and anonymous upload/chat refusal. The 73 regression tests use embedded PGlite PostgreSQL fixtures and mocked providers. Constant fixture distance tests access predicates, not embedding quality. Share/delete controls are owner-only in the UI; server predicates remain the enforcement boundary.
+
+Upload authentication runs before loading PDF-parser or persistence modules. Deployment tracing explicitly includes PDF workers and platform canvas files; regressions also cover initialization failures without disclosing private errors.
 
 SQL and OpenFGA are not one transaction. Failed creation can leave remote tuples without a committed document; SQL access checks prevent reading such a document. Deletion revokes SQL access first and reports incomplete remote cleanup. OpenFGA idempotency options require a compatible configured service. No live tuple cleanup, model run, database migration, seed, provider write, or hosted sign-in proof is implied.
 

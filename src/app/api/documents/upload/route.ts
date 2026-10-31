@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFParse } from 'pdf-parse';
-
-import { createDocument } from '@/lib/actions/documents';
 import { auth0 } from '@/lib/auth0';
 import { DocumentAuthenticationError, requireDocumentActor } from '@/lib/document-access';
 
@@ -48,6 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'File is empty or has only images.' }, { status: 400 });
     }
 
+    const { createDocument } = await import('@/lib/actions/documents');
     const result = await createDocument(
       {
         content: buffer!,
@@ -81,6 +79,7 @@ const extractFileContent = async (file: File): Promise<[string | null, Buffer | 
   const fileBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(fileBuffer);
   if (file.type === 'application/pdf') {
+    const { PDFParse } = await import('pdf-parse');
     const parser = new PDFParse({ data: buffer, isEvalSupported: false, disableAutoFetch: true });
     try {
       const data = await parser.getText();
